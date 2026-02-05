@@ -1,0 +1,13 @@
+2025-07-27 02:29:02,914 - INFO - Starting Zakat Nisab analysis...
+2025-07-27 02:29:02,915 - ERROR - Missing required environment variables: ['EMAIL_USERNAME', 'EMAIL_PASSWORD', 'ZAKAT_ENCRYPTION_KEY']
+2025-07-27 02:29:02,915 - INFO - Please configure GitHub Secrets for email access
+2026-02-01 11:16:08,832 - WARNING - Could not load encrypted balance history: InvalidToken: 
+2026-02-01 11:16:08,832 - INFO - Starting with empty balance history
+2026-02-01 11:16:18,030 - INFO - Company email source configured: c***@***.com
+2026-02-01 11:16:18,037 - WARNING - Could not load encrypted balance history: InvalidToken: 
+2026-02-01 11:16:18,037 - INFO - Starting with empty balance history
+2026-02-01 20:44:31,388 - INFO - 3 changes detected
+2026-02-01 20:44:32,974 - INFO - 11 changes detected
+2026-02-01 20:44:33,333 - INFO - 6 changes detected
+2026-02-01 20:44:33,745 - INFO - 13 changes detected
+2026-02-01 20:51:06,085 - INFO - 3 changes detected

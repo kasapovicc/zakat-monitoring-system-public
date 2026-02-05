@@ -1,0 +1,288 @@
+{% extends "base.html" %}
+
+{% block title %}History - Zekat Monitor{% endblock %}
+
+{% block content %}
+<div class="space-y-6 fade-in">
+    <!-- Page Header -->
+    <div class="flex justify-between items-center">
+        <h2 class="text-2xl font-bold text-gray-900">Balance History</h2>
+        <button onclick="loadHistory()"
+                class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium">
+            Refresh
+        </button>
+    </div>
+
+    <!-- Balance Chart -->
+    <div class="bg-white rounded-lg shadow p-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Balance Trend</h3>
+        <div class="relative h-64">
+            <canvas id="balanceChart"></canvas>
+        </div>
+    </div>
+
+    <!-- History Table -->
+    <div class="bg-white rounded-lg shadow overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <h3 class="text-lg font-semibold text-gray-900">Historical Records</h3>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200" id="history-table">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Date (Hijri)
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Date (Gregorian)
+                        </th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            BAM Balance
+                        </th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            EUR Balance
+                        </th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Total (BAM)
+                        </th>
+                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Above Nisab
+                        </th>
+                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Consecutive Months
+                        </th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200" id="history-tbody">
+                    <tr>
+                        <td colspan="7" class="px-6 py-8 text-center text-gray-500">
+                            Enter your master password to view history
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="px-6 py-4 bg-gray-50 border-t border-gray-200">
+            <p class="text-sm text-gray-600">
+                Total records: <span id="record-count" class="font-medium">0</span>
+            </p>
+        </div>
+    </div>
+</div>
+
+<!-- Password Modal -->
+<div id="password-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div class="mt-3">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Enter Master Password</h3>
+            <form id="password-form" class="space-y-4">
+                <div>
+                    <input type="password" id="master-password" required placeholder="Master password"
+                           class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2 border">
+                </div>
+                <div class="flex justify-end space-x-3">
+                    <button type="submit"
+                            class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                        Load History
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    let balanceChart = null;
+
+    // Try cached password on load
+    window.addEventListener('DOMContentLoaded', function() {
+        const cached = getStoredPassword();
+        if (cached) {
+            loadHistoryData(cached);
+        }
+    });
+
+    document.getElementById('password-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const password = document.getElementById('master-password').value;
+        loadHistoryData(password);
+    });
+
+    function loadHistory() {
+        const password = getStoredPassword() || prompt('Enter your master password:');
+        if (password) {
+            loadHistoryData(password);
+        }
+    }
+
+    function createHistoryRow(entry) {
+        const row = document.createElement('tr');
+
+        // Hijri date
+        const hijriCell = document.createElement('td');
+        hijriCell.className = 'px-6 py-4 whitespace-nowrap text-sm text-gray-900';
+        hijriCell.textContent = entry.hijri_date;
+        row.appendChild(hijriCell);
+
+        // Gregorian date
+        const gregorianCell = document.createElement('td');
+        gregorianCell.className = 'px-6 py-4 whitespace-nowrap text-sm text-gray-900';
+        gregorianCell.textContent = entry.gregorian_date;
+        row.appendChild(gregorianCell);
+
+        // BAM balance
+        const bamCell = document.createElement('td');
+        bamCell.className = 'px-6 py-4 whitespace-nowrap text-sm text-right text-gray-900';
+        bamCell.textContent = entry.balance_bam.toFixed(2);
+        row.appendChild(bamCell);
+
+        // EUR balance
+        const eurCell = document.createElement('td');
+        eurCell.className = 'px-6 py-4 whitespace-nowrap text-sm text-right text-gray-900';
+        eurCell.textContent = entry.balance_eur.toFixed(2);
+        row.appendChild(eurCell);
+
+        // Total BAM
+        const totalCell = document.createElement('td');
+        totalCell.className = 'px-6 py-4 whitespace-nowrap text-sm text-right font-medium text-gray-900';
+        totalCell.textContent = entry.total_bam.toFixed(2);
+        row.appendChild(totalCell);
+
+        // Above nisab badge
+        const nisabCell = document.createElement('td');
+        nisabCell.className = 'px-6 py-4 whitespace-nowrap text-center';
+        const badge = document.createElement('span');
+        badge.className = 'inline-flex px-2 py-1 text-xs font-semibold rounded-full';
+        if (entry.above_nisab) {
+            badge.classList.add('bg-green-100', 'text-green-800');
+            badge.textContent = 'Yes';
+        } else {
+            badge.classList.add('bg-red-100', 'text-red-800');
+            badge.textContent = 'No';
+        }
+        nisabCell.appendChild(badge);
+        row.appendChild(nisabCell);
+
+        // Consecutive months
+        const monthsCell = document.createElement('td');
+        monthsCell.className = 'px-6 py-4 whitespace-nowrap text-sm text-center text-gray-900';
+        monthsCell.textContent = entry.consecutive_months;
+        row.appendChild(monthsCell);
+
+        return row;
+    }
+
+    function loadHistoryData(password) {
+        fetch(`/api/history?master_password=${encodeURIComponent(password)}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Invalid password or error loading history');
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Hide password modal and cache password
+                document.getElementById('password-modal').classList.add('hidden');
+                storePassword(password);
+
+                // Update record count
+                document.getElementById('record-count').textContent = data.total_count;
+
+                // Populate table using safe DOM methods
+                const tbody = document.getElementById('history-tbody');
+                tbody.innerHTML = ''; // Clear existing rows
+
+                if (data.entries.length === 0) {
+                    const emptyRow = document.createElement('tr');
+                    const emptyCell = document.createElement('td');
+                    emptyCell.colSpan = 7;
+                    emptyCell.className = 'px-6 py-8 text-center text-gray-500';
+                    emptyCell.textContent = 'No history records found. Run an analysis to start tracking.';
+                    emptyRow.appendChild(emptyCell);
+                    tbody.appendChild(emptyRow);
+                } else {
+                    data.entries.forEach(entry => {
+                        tbody.appendChild(createHistoryRow(entry));
+                    });
+                }
+
+                // Update chart
+                updateChart(data.entries);
+
+                showNotification('History loaded successfully', 'success');
+            })
+            .catch(error => {
+                clearStoredPassword();
+                document.getElementById('password-modal').classList.remove('hidden');
+                showNotification(error.message, 'error');
+            });
+    }
+
+    function updateChart(entries) {
+        const ctx = document.getElementById('balanceChart').getContext('2d');
+
+        // Prepare data
+        const labels = entries.map(e => e.gregorian_date);
+        const balances = entries.map(e => e.total_bam);
+        const nisabValues = entries.map(e => e.nisab_threshold);
+
+        // Destroy existing chart
+        if (balanceChart) {
+            balanceChart.destroy();
+        }
+
+        // Create new chart
+        balanceChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'Total Balance (BAM)',
+                        data: balances,
+                        borderColor: 'rgb(59, 130, 246)',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        tension: 0.3,
+                        fill: true
+                    },
+                    {
+                        label: 'Nisab Threshold',
+                        data: nisabValues,
+                        borderColor: 'rgb(239, 68, 68)',
+                        backgroundColor: 'rgba(239, 68, 68, 0.05)',
+                        borderDash: [5, 5],
+                        tension: 0,
+                        fill: false
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false,
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        ticks: {
+                            callback: function(value) {
+                                return value.toFixed(0) + ' BAM';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+</script>
+{% endblock %}

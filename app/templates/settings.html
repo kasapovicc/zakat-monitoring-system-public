@@ -1,0 +1,902 @@
+{% extends "base.html" %}
+
+{% block title %}Settings - Zekat Monitor{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto space-y-6 fade-in">
+    <!-- Page Header -->
+    <div>
+        <h2 class="text-2xl font-bold text-gray-900">Settings</h2>
+        <p class="text-gray-600 mt-1">Manage your zakat monitoring configuration</p>
+    </div>
+
+    <!-- Authentication Card -->
+    <div class="bg-white rounded-lg shadow p-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Authentication</h3>
+        <div class="space-y-4">
+            <div>
+                <label for="master_password" class="block text-sm font-medium text-gray-700">
+                    Master Password <span class="text-red-500">*</span>
+                </label>
+                <input type="password" id="master_password" required
+                       class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2">
+                <p class="mt-1 text-sm text-gray-500">Required to load and save settings</p>
+            </div>
+            <div>
+                <button type="button" onclick="loadSettings()"
+                        class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium transition-colors">
+                    Load Settings
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Email Sources & Accounts Card -->
+    <div id="email-sources-card" class="bg-white rounded-lg shadow p-6 hidden">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-semibold text-gray-900">Email Sources & Accounts</h3>
+        </div>
+
+        <!-- Email Sources Container -->
+        <div id="email-sources-container" class="space-y-4">
+            <!-- Email source cards will be dynamically inserted here -->
+        </div>
+
+        <!-- Add Email Source Form (initially hidden) -->
+        <div id="add-email-source-form" class="hidden mt-6 pt-6 border-t border-gray-200">
+            <h4 class="text-sm font-semibold text-gray-900 mb-4">Add New Email Source</h4>
+            <div class="space-y-4 bg-gray-50 p-4 rounded-md">
+                <div>
+                    <label for="new_label" class="block text-sm font-medium text-gray-700">Label (optional)</label>
+                    <input type="text" id="new_label"
+                           placeholder="e.g. Personal, Company, Savings"
+                           class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2 text-sm">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label for="new_email" class="block text-sm font-medium text-gray-700">Email Address</label>
+                        <input type="email" id="new_email" required
+                               class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2 text-sm">
+                    </div>
+                    <div>
+                        <label for="new_password" class="block text-sm font-medium text-gray-700">Email Password</label>
+                        <input type="password" id="new_password" required
+                               class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2 text-sm">
+                    </div>
+                    <div>
+                        <label for="new_imap_server" class="block text-sm font-medium text-gray-700">IMAP Server</label>
+                        <input type="text" id="new_imap_server" value="imap.gmail.com" required
+                               class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2 text-sm">
+                    </div>
+                    <div>
+                        <label for="new_imap_port" class="block text-sm font-medium text-gray-700">IMAP Port</label>
+                        <input type="number" id="new_imap_port" value="993" required
+                               class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2 text-sm">
+                    </div>
+                </div>
+
+                <!-- Account Pairs -->
+                <div class="border-t border-gray-300 pt-4">
+                    <h5 class="text-sm font-medium text-gray-900 mb-3">Account Pairs (BAM/EUR)</h5>
+                    <div id="account-pairs-container" class="space-y-3">
+                        <div class="account-pair bg-white p-3 rounded border border-gray-200">
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-700">BAM Account</label>
+                                    <input type="text" class="bam-account mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2 text-sm" required>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-700">EUR Account</label>
+                                    <input type="text" class="eur-account mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2 text-sm" required>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" onclick="addAccountPair()"
+                            class="mt-3 text-sm text-blue-600 hover:text-blue-700 font-medium">
+                        + Add Account Pair
+                    </button>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="flex justify-end space-x-3 pt-4 border-t border-gray-300">
+                    <button type="button" onclick="cancelAddEmailSource()"
+                            class="px-3 py-2 text-sm bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 font-medium">
+                        Cancel
+                    </button>
+                    <button type="button" onclick="saveNewEmailSource()"
+                            class="px-3 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium">
+                        Save Email Source
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Email Source Button -->
+        <button type="button" id="add-email-source-btn" onclick="showAddEmailSourceForm()"
+                class="mt-6 pt-6 border-t border-gray-200 w-full text-center px-4 py-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-md font-medium text-sm transition-colors">
+            + Add Email Source
+        </button>
+    </div>
+
+    <!-- Report Delivery Card -->
+    <div id="report-delivery-card" class="bg-white rounded-lg shadow p-6 hidden">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-semibold text-gray-900">Report Delivery</h3>
+            <button type="button" onclick="toggleReportDeliveryEdit()"
+                    class="text-sm text-blue-600 hover:text-blue-700 font-medium">
+                Edit
+            </button>
+        </div>
+
+        <!-- Display Mode -->
+        <div id="report-delivery-display" class="space-y-3">
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <p class="text-xs font-medium text-gray-500 uppercase">SMTP Server</p>
+                    <p class="text-sm text-gray-900 mt-1" id="report-smtp-server">—</p>
+                </div>
+                <div>
+                    <p class="text-xs font-medium text-gray-500 uppercase">SMTP Port</p>
+                    <p class="text-sm text-gray-900 mt-1" id="report-smtp-port">—</p>
+                </div>
+                <div>
+                    <p class="text-xs font-medium text-gray-500 uppercase">Username</p>
+                    <p class="text-sm text-gray-900 mt-1" id="report-smtp-username">—</p>
+                </div>
+                <div>
+                    <p class="text-xs font-medium text-gray-500 uppercase">Sender Email</p>
+                    <p class="text-sm text-gray-900 mt-1" id="report-sender-email">—</p>
+                </div>
+                <div class="col-span-2">
+                    <p class="text-xs font-medium text-gray-500 uppercase">Recipient Email</p>
+                    <p class="text-sm text-gray-900 mt-1" id="report-recipient-email">—</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Edit Mode -->
+        <div id="report-delivery-edit" class="hidden space-y-4 bg-gray-50 p-4 rounded-md">
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label for="edit_smtp_server" class="block text-sm font-medium text-gray-700">SMTP Server</label>
+                    <input type="text" id="edit_smtp_server"
+                           class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2 text-sm">
+                </div>
+                <div>
+                    <label for="edit_smtp_port" class="block text-sm font-medium text-gray-700">SMTP Port</label>
+                    <input type="number" id="edit_smtp_port"
+                           class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2 text-sm">
+                </div>
+                <div>
+                    <label for="edit_smtp_username" class="block text-sm font-medium text-gray-700">Username</label>
+                    <input type="text" id="edit_smtp_username"
+                           class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2 text-sm">
+                </div>
+                <div>
+                    <label for="edit_sender_email" class="block text-sm font-medium text-gray-700">Sender Email</label>
+                    <input type="email" id="edit_sender_email"
+                           class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2 text-sm">
+                </div>
+                <div class="col-span-2">
+                    <label for="edit_recipient_email" class="block text-sm font-medium text-gray-700">Recipient Email</label>
+                    <input type="email" id="edit_recipient_email"
+                           class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2 text-sm">
+                </div>
+            </div>
+
+            <div class="flex justify-end space-x-3 pt-4 border-t border-gray-300">
+                <button type="button" onclick="toggleReportDeliveryEdit()"
+                        class="px-3 py-2 text-sm bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 font-medium">
+                    Cancel
+                </button>
+                <button type="button" onclick="saveReportDelivery()"
+                        class="px-3 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium">
+                    Save
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Year Progress Override Card -->
+    <div id="year-progress-card" class="bg-white rounded-lg shadow p-6 hidden">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-semibold text-gray-900">Year Progress Override</h3>
+            <button type="button" onclick="toggleYearProgressEdit()"
+                    class="text-sm text-blue-600 hover:text-blue-700 font-medium">
+                Edit
+            </button>
+        </div>
+
+        <!-- Display Mode -->
+        <div id="year-progress-display" class="space-y-3">
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <p class="text-xs font-medium text-gray-500 uppercase">Override Enabled</p>
+                    <p class="text-sm text-gray-900 mt-1" id="year-progress-enabled">—</p>
+                </div>
+                <div>
+                    <p class="text-xs font-medium text-gray-500 uppercase">Months</p>
+                    <p class="text-sm text-gray-900 mt-1" id="year-progress-months">—</p>
+                </div>
+                <div class="col-span-2">
+                    <p class="text-xs font-medium text-gray-500 uppercase">Hijri Date</p>
+                    <p class="text-sm text-gray-900 mt-1" id="year-progress-hijri-date">—</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Edit Mode -->
+        <div id="year-progress-edit" class="hidden space-y-4 bg-gray-50 p-4 rounded-md">
+            <div>
+                <label class="flex items-center space-x-2">
+                    <input type="checkbox" id="year_progress_enabled"
+                           class="rounded border-gray-300 focus:border-blue-500 focus:ring-blue-500">
+                    <span class="text-sm font-medium text-gray-700">Enable Year Progress Override</span>
+                </label>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label for="year_progress_months" class="block text-sm font-medium text-gray-700">Months (0-11)</label>
+                    <input type="number" id="year_progress_months" min="0" max="11"
+                           class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2 text-sm">
+                </div>
+                <div>
+                    <label for="year_progress_hijri_date" class="block text-sm font-medium text-gray-700">Hijri Date (DD/MM/YYYY)</label>
+                    <input type="text" id="year_progress_hijri_date" placeholder="01/01/1446"
+                           class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2 text-sm">
+                </div>
+            </div>
+
+            <div class="flex justify-end space-x-3 pt-4 border-t border-gray-300">
+                <button type="button" onclick="toggleYearProgressEdit()"
+                        class="px-3 py-2 text-sm bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 font-medium">
+                    Cancel
+                </button>
+                <button type="button" onclick="saveYearProgress()"
+                        class="px-3 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium">
+                    Save
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Additional Settings Card -->
+    <div id="additional-settings-card" class="bg-white rounded-lg shadow p-6 hidden">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-semibold text-gray-900">Additional Settings</h3>
+            <button type="button" onclick="toggleAdditionalSettingsEdit()"
+                    class="text-sm text-blue-600 hover:text-blue-700 font-medium">
+                Edit
+            </button>
+        </div>
+
+        <!-- Display Mode -->
+        <div id="additional-settings-display" class="space-y-3">
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <p class="text-xs font-medium text-gray-500 uppercase">Additional Assets (BAM)</p>
+                    <p class="text-sm text-gray-900 mt-1" id="additional-assets-value">—</p>
+                </div>
+                <div>
+                    <p class="text-xs font-medium text-gray-500 uppercase">Nisab Fallback (BAM)</p>
+                    <p class="text-sm text-gray-900 mt-1" id="nisab-fallback-value">—</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Edit Mode -->
+        <div id="additional-settings-edit" class="hidden space-y-4 bg-gray-50 p-4 rounded-md">
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label for="edit_additional_assets" class="block text-sm font-medium text-gray-700">Additional Assets (BAM)</label>
+                    <input type="number" id="edit_additional_assets" min="0" step="0.01"
+                           class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2 text-sm">
+                </div>
+                <div>
+                    <label for="edit_nisab_fallback" class="block text-sm font-medium text-gray-700">Nisab Fallback (BAM)</label>
+                    <input type="number" id="edit_nisab_fallback" min="1" step="0.01"
+                           class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2 text-sm">
+                </div>
+            </div>
+
+            <div class="flex justify-end space-x-3 pt-4 border-t border-gray-300">
+                <button type="button" onclick="toggleAdditionalSettingsEdit()"
+                        class="px-3 py-2 text-sm bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 font-medium">
+                    Cancel
+                </button>
+                <button type="button" onclick="saveAdditionalSettings()"
+                        class="px-3 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium">
+                    Save
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Danger Zone Card -->
+    <div class="bg-red-50 border border-red-200 rounded-lg shadow p-6">
+        <h3 class="text-lg font-semibold text-red-900 mb-2">Danger Zone</h3>
+        <p class="text-sm text-red-700 mb-6">
+            These actions cannot be undone. Please be certain before proceeding.
+        </p>
+
+        <div class="space-y-4">
+            <!-- Restart Setup Wizard Button -->
+            <button type="button" onclick="restartSetupWizard()"
+                    class="w-full px-4 py-2 text-left text-red-700 bg-white border border-red-200 rounded-md hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500 font-medium transition-colors">
+                Restart Setup Wizard
+            </button>
+
+            <!-- Delete All Configuration -->
+            <div class="border border-red-200 rounded-md p-4 bg-white">
+                <p class="text-sm font-medium text-red-900 mb-3">Delete All Configuration</p>
+                <p class="text-xs text-red-700 mb-3">
+                    This will permanently delete all your configuration data. Type "DELETE" below to confirm.
+                </p>
+                <div class="space-y-3">
+                    <input type="text" id="delete-confirm-input" placeholder="Type DELETE to confirm"
+                           class="block w-full rounded-md border border-red-200 shadow-sm focus:border-red-500 focus:ring-red-500 px-3 py-2 text-sm">
+                    <button type="button" onclick="deleteAllConfiguration()"
+                            class="w-full px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            id="delete-all-btn"
+                            disabled>
+                        Delete All Configuration
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    // State management
+    let storedPassword = null;
+    let currentSettings = null;
+
+    // Try cached password on load
+    window.addEventListener('DOMContentLoaded', function() {
+        const cached = getStoredPassword();
+        if (cached) {
+            document.getElementById('master_password').value = cached;
+            loadSettings();
+        }
+    });
+
+    // Utility function to mask sensitive data
+    function maskEmail(email) {
+        if (!email) return '—';
+        const [localPart, domain] = email.split('@');
+        const masked = localPart.charAt(0) + '*'.repeat(Math.max(0, localPart.length - 2)) + '@' + domain;
+        return masked;
+    }
+
+    function maskAccountNumber(account) {
+        if (!account) return '—';
+        return account.slice(0, 2) + '*'.repeat(Math.max(0, account.length - 4)) + account.slice(-2);
+    }
+
+    function formatValue(value) {
+        if (value === null || value === undefined) return '—';
+        if (typeof value === 'boolean') return value ? 'Enabled' : 'Disabled';
+        return String(value);
+    }
+
+    // Load settings from API
+    function loadSettings() {
+        const password = document.getElementById('master_password').value;
+        if (!password) {
+            showNotification('Please enter your master password', 'error');
+            return;
+        }
+
+        const params = new URLSearchParams({ master_password: password });
+
+        fetch(`/api/settings/full?${params}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    storedPassword = password;
+                    storePassword(password);
+                    currentSettings = data.data;
+                    populateSettingsUI();
+                    showNotification('Settings loaded successfully', 'success');
+                } else {
+                    throw new Error(data.message || 'Failed to load settings');
+                }
+            })
+            .catch(error => {
+                clearStoredPassword();
+                showNotification(error.message, 'error');
+            });
+    }
+
+    // Populate UI with loaded settings
+    function populateSettingsUI() {
+        if (!currentSettings) return;
+
+        // Show all cards
+        document.getElementById('email-sources-card').classList.remove('hidden');
+        document.getElementById('report-delivery-card').classList.remove('hidden');
+        document.getElementById('year-progress-card').classList.remove('hidden');
+        document.getElementById('additional-settings-card').classList.remove('hidden');
+
+        // Populate email sources
+        populateEmailSources();
+
+        // Populate report delivery
+        populateReportDelivery();
+
+        // Populate year progress
+        populateYearProgress();
+
+        // Populate additional settings
+        populateAdditionalSettings();
+    }
+
+    // Email Sources
+    function populateEmailSources() {
+        const container = document.getElementById('email-sources-container');
+        container.textContent = '';
+
+        const emailSources = currentSettings.email_sources || [];
+
+        emailSources.forEach((source, index) => {
+            const sourceCard = document.createElement('div');
+            sourceCard.className = 'border border-gray-200 rounded-lg p-4 bg-gray-50';
+
+            const headerDiv = document.createElement('div');
+            headerDiv.className = 'flex items-start justify-between mb-3';
+
+            const infoDiv = document.createElement('div');
+            infoDiv.className = 'flex-1';
+
+            const labelP = document.createElement('p');
+            labelP.className = 'text-sm font-semibold text-gray-900';
+            labelP.textContent = source.label || `Source ${index + 1}`;
+
+            const emailP = document.createElement('p');
+            emailP.className = 'text-xs text-gray-600 mt-0.5';
+            emailP.textContent = maskEmail(source.email);
+
+            const serverP = document.createElement('p');
+            serverP.className = 'text-xs text-gray-500 mt-1';
+            serverP.textContent = source.imap_server + ':' + source.imap_port;
+
+            infoDiv.appendChild(labelP);
+            infoDiv.appendChild(emailP);
+            infoDiv.appendChild(serverP);
+
+            const deleteBtn = document.createElement('button');
+            deleteBtn.type = 'button';
+            deleteBtn.className = 'ml-2 px-3 py-1 text-sm bg-red-600 text-white rounded-md hover:bg-red-700 font-medium transition-colors' +
+                (emailSources.length === 1 ? ' opacity-50 cursor-not-allowed' : '');
+            deleteBtn.textContent = 'Delete';
+            deleteBtn.disabled = emailSources.length === 1;
+            deleteBtn.onclick = () => deleteEmailSource(index);
+
+            headerDiv.appendChild(infoDiv);
+            headerDiv.appendChild(deleteBtn);
+
+            const accountsDiv = document.createElement('div');
+            accountsDiv.className = 'bg-white rounded p-3';
+
+            const accountsLabelP = document.createElement('p');
+            accountsLabelP.className = 'text-xs font-medium text-gray-600 uppercase mb-2';
+            accountsLabelP.textContent = 'Account Pairs';
+
+            const accountsListDiv = document.createElement('div');
+            accountsListDiv.className = 'space-y-2';
+
+            const pairs = source.account_pairs || [];
+            pairs.forEach((account, pairIndex) => {
+                const accountItemDiv = document.createElement('div');
+                accountItemDiv.className = 'flex items-center justify-between text-sm';
+
+                const labelsDiv = document.createElement('div');
+                labelsDiv.className = 'flex space-x-4';
+
+                const bamSpan = document.createElement('span');
+                bamSpan.className = 'text-gray-600';
+                bamSpan.textContent = 'BAM: ' + maskAccountNumber(account.bam_account);
+
+                const eurSpan = document.createElement('span');
+                eurSpan.className = 'text-gray-600';
+                eurSpan.textContent = 'EUR: ' + maskAccountNumber(account.eur_account);
+
+                labelsDiv.appendChild(bamSpan);
+                labelsDiv.appendChild(eurSpan);
+                accountItemDiv.appendChild(labelsDiv);
+
+                if (pairs.length > 1) {
+                    const delPairBtn = document.createElement('button');
+                    delPairBtn.type = 'button';
+                    delPairBtn.className = 'text-xs text-red-600 hover:text-red-800 font-medium';
+                    delPairBtn.textContent = 'Remove';
+                    delPairBtn.onclick = () => deleteAccountPair(source.id, pairIndex);
+                    accountItemDiv.appendChild(delPairBtn);
+                }
+
+                accountsListDiv.appendChild(accountItemDiv);
+            });
+
+            accountsDiv.appendChild(accountsLabelP);
+            accountsDiv.appendChild(accountsListDiv);
+
+            sourceCard.appendChild(headerDiv);
+            sourceCard.appendChild(accountsDiv);
+            container.appendChild(sourceCard);
+        });
+
+        if (emailSources.length === 0) {
+            const emptyState = document.createElement('div');
+            emptyState.className = 'text-center py-6 text-gray-500';
+            emptyState.textContent = 'No email sources configured yet.';
+            container.appendChild(emptyState);
+        }
+    }
+
+    function showAddEmailSourceForm() {
+        document.getElementById('add-email-source-form').classList.remove('hidden');
+        document.getElementById('add-email-source-btn').classList.add('hidden');
+    }
+
+    function cancelAddEmailSource() {
+        document.getElementById('add-email-source-form').classList.add('hidden');
+        document.getElementById('add-email-source-btn').classList.remove('hidden');
+
+        // Clear form
+        document.getElementById('new_label').value = '';
+        document.getElementById('new_email').value = '';
+        document.getElementById('new_password').value = '';
+        document.getElementById('new_imap_server').value = 'imap.gmail.com';
+        document.getElementById('new_imap_port').value = '993';
+        document.getElementById('account-pairs-container').textContent = '';
+
+        const pair = document.createElement('div');
+        pair.className = 'account-pair bg-white p-3 rounded border border-gray-200';
+        pair.innerHTML = `
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-medium text-gray-700">BAM Account</label>
+                    <input type="text" class="bam-account mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2 text-sm" required>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-700">EUR Account</label>
+                    <input type="text" class="eur-account mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2 text-sm" required>
+                </div>
+            </div>
+        `;
+        document.getElementById('account-pairs-container').appendChild(pair);
+    }
+
+    function addAccountPair() {
+        const container = document.getElementById('account-pairs-container');
+        const pair = document.createElement('div');
+        pair.className = 'account-pair bg-white p-3 rounded border border-gray-200';
+        pair.innerHTML = `
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-medium text-gray-700">BAM Account</label>
+                    <input type="text" class="bam-account mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2 text-sm" required>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-700">EUR Account</label>
+                    <input type="text" class="eur-account mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2 text-sm" required>
+                </div>
+            </div>
+        `;
+        container.appendChild(pair);
+    }
+
+    function saveNewEmailSource() {
+        const label = document.getElementById('new_label').value || '';
+        const email = document.getElementById('new_email').value;
+        const password = document.getElementById('new_password').value;
+        const imapServer = document.getElementById('new_imap_server').value;
+        const imapPort = parseInt(document.getElementById('new_imap_port').value);
+
+        if (!email || !password || !imapServer || !imapPort) {
+            showNotification('Please fill in all fields', 'error');
+            return;
+        }
+
+        // Collect account pairs
+        const accounts = [];
+        document.querySelectorAll('#account-pairs-container .account-pair').forEach(pair => {
+            const bamAccount = pair.querySelector('.bam-account').value;
+            const eurAccount = pair.querySelector('.eur-account').value;
+            if (bamAccount && eurAccount) {
+                accounts.push({ bam_account: bamAccount, eur_account: eurAccount });
+            }
+        });
+
+        if (accounts.length === 0) {
+            showNotification('Please add at least one account pair', 'error');
+            return;
+        }
+
+        const payload = {
+            master_password: storedPassword,
+            email_source: {
+                label,
+                email,
+                password,
+                imap_server: imapServer,
+                imap_port: imapPort,
+                account_pairs: accounts
+            }
+        };
+
+        fetch('/api/settings/email-sources', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showNotification('Email source added successfully', 'success');
+                cancelAddEmailSource();
+                loadSettings();
+            } else {
+                throw new Error(data.message || 'Failed to add email source');
+            }
+        })
+        .catch(error => {
+            showNotification(error.message, 'error');
+        });
+    }
+
+    function deleteEmailSource(index) {
+        const source = currentSettings.email_sources[index];
+        if (currentSettings.email_sources.length === 1) {
+            showNotification('You must keep at least one email source', 'error');
+            return;
+        }
+
+        if (!confirm('Delete email source ' + maskEmail(source.email) + '? This cannot be undone.')) {
+            return;
+        }
+
+        const payload = {
+            master_password: storedPassword
+        };
+
+        fetch(`/api/settings/email-sources/${source.id}`, {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showNotification('Email source deleted successfully', 'success');
+                loadSettings();
+            } else {
+                throw new Error(data.message || 'Failed to delete email source');
+            }
+        })
+        .catch(error => {
+            showNotification(error.message, 'error');
+        });
+    }
+
+    function deleteAccountPair(sourceId, pairIndex) {
+        if (!confirm('Remove this account pair?')) return;
+
+        fetch(`/api/settings/email-sources/${sourceId}/account-pairs/${pairIndex}`, {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ master_password: storedPassword })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showNotification('Account pair removed', 'success');
+                loadSettings();
+            } else {
+                throw new Error(data.detail || 'Failed to remove account pair');
+            }
+        })
+        .catch(error => {
+            showNotification(error.message, 'error');
+        });
+    }
+
+    // Report Delivery
+    function populateReportDelivery() {
+        const delivery = currentSettings.report_delivery || {};
+        document.getElementById('report-smtp-server').textContent = formatValue(delivery.smtp_server);
+        document.getElementById('report-smtp-port').textContent = formatValue(delivery.smtp_port);
+        document.getElementById('report-smtp-username').textContent = maskEmail(delivery.username);
+        document.getElementById('report-sender-email').textContent = maskEmail(delivery.sender_email);
+        document.getElementById('report-recipient-email').textContent = maskEmail(delivery.recipient_email);
+
+        // Populate edit fields
+        document.getElementById('edit_smtp_server').value = delivery.smtp_server || '';
+        document.getElementById('edit_smtp_port').value = delivery.smtp_port || '';
+        document.getElementById('edit_smtp_username').value = delivery.username || '';
+        document.getElementById('edit_sender_email').value = delivery.sender_email || '';
+        document.getElementById('edit_recipient_email').value = delivery.recipient_email || '';
+    }
+
+    function toggleReportDeliveryEdit() {
+        document.getElementById('report-delivery-display').classList.toggle('hidden');
+        document.getElementById('report-delivery-edit').classList.toggle('hidden');
+    }
+
+    function saveReportDelivery() {
+        const payload = {
+            master_password: storedPassword,
+            report_delivery: {
+                smtp_server: document.getElementById('edit_smtp_server').value,
+                smtp_port: parseInt(document.getElementById('edit_smtp_port').value) || null,
+                username: document.getElementById('edit_smtp_username').value,
+                sender_email: document.getElementById('edit_sender_email').value,
+                recipient_email: document.getElementById('edit_recipient_email').value
+            }
+        };
+
+        fetch('/api/settings', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showNotification('Report delivery settings saved', 'success');
+                toggleReportDeliveryEdit();
+                loadSettings();
+            } else {
+                throw new Error(data.message || 'Failed to save settings');
+            }
+        })
+        .catch(error => {
+            showNotification(error.message, 'error');
+        });
+    }
+
+    // Year Progress
+    function populateYearProgress() {
+        const override = currentSettings.year_progress_override || {};
+        document.getElementById('year-progress-enabled').textContent = formatValue(override.enabled);
+        document.getElementById('year-progress-months').textContent = formatValue(override.months_above_nisab);
+        document.getElementById('year-progress-hijri-date').textContent = formatValue(override.as_of_hijri_date);
+
+        // Populate edit fields
+        document.getElementById('year_progress_enabled').checked = override.enabled || false;
+        document.getElementById('year_progress_months').value = override.months_above_nisab || '';
+        document.getElementById('year_progress_hijri_date').value = override.as_of_hijri_date || '';
+    }
+
+    function toggleYearProgressEdit() {
+        document.getElementById('year-progress-display').classList.toggle('hidden');
+        document.getElementById('year-progress-edit').classList.toggle('hidden');
+    }
+
+    function saveYearProgress() {
+        const payload = {
+            master_password: storedPassword,
+            enabled: document.getElementById('year_progress_enabled').checked,
+            months_above_nisab: parseInt(document.getElementById('year_progress_months').value) || 0,
+            as_of_hijri_date: document.getElementById('year_progress_hijri_date').value
+        };
+
+        fetch('/api/settings/year-progress', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showNotification('Year progress settings saved', 'success');
+                toggleYearProgressEdit();
+                loadSettings();
+            } else {
+                throw new Error(data.message || 'Failed to save settings');
+            }
+        })
+        .catch(error => {
+            showNotification(error.message, 'error');
+        });
+    }
+
+    // Additional Settings
+    function populateAdditionalSettings() {
+        document.getElementById('additional-assets-value').textContent = formatValue(currentSettings.additional_assets);
+        document.getElementById('nisab-fallback-value').textContent = formatValue(currentSettings.nisab_fallback_bam);
+
+        // Populate edit fields
+        document.getElementById('edit_additional_assets').value = currentSettings.additional_assets || '';
+        document.getElementById('edit_nisab_fallback').value = currentSettings.nisab_fallback_bam || '';
+    }
+
+    function toggleAdditionalSettingsEdit() {
+        document.getElementById('additional-settings-display').classList.toggle('hidden');
+        document.getElementById('additional-settings-edit').classList.toggle('hidden');
+    }
+
+    function saveAdditionalSettings() {
+        const payload = {
+            master_password: storedPassword
+        };
+
+        const additionalAssets = document.getElementById('edit_additional_assets').value;
+        const nisabFallback = document.getElementById('edit_nisab_fallback').value;
+
+        if (additionalAssets) payload.additional_assets = parseFloat(additionalAssets);
+        if (nisabFallback) payload.nisab_fallback_bam = parseFloat(nisabFallback);
+
+        fetch('/api/settings', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showNotification('Additional settings saved', 'success');
+                toggleAdditionalSettingsEdit();
+                loadSettings();
+            } else {
+                throw new Error(data.message || 'Failed to save settings');
+            }
+        })
+        .catch(error => {
+            showNotification(error.message, 'error');
+        });
+    }
+
+    // Danger Zone Actions
+    function restartSetupWizard() {
+        if (confirm('This will restart the setup wizard. Continue?')) {
+            window.location.href = '/setup?restart=true';
+        }
+    }
+
+    // Enable/disable delete button based on confirmation text
+    document.getElementById('delete-confirm-input').addEventListener('input', function() {
+        const btn = document.getElementById('delete-all-btn');
+        btn.disabled = this.value !== 'DELETE';
+    });
+
+    function deleteAllConfiguration() {
+        const confirmText = document.getElementById('delete-confirm-input').value;
+        if (confirmText !== 'DELETE') {
+            showNotification('Please type DELETE to confirm', 'error');
+            return;
+        }
+
+        if (!confirm('Are you absolutely sure? This will delete all your configuration permanently. This action cannot be undone.')) {
+            return;
+        }
+
+        const password = storedPassword || getStoredPassword() || prompt('Enter your master password to confirm deletion:');
+        if (!password) return;
+
+        fetch(`/api/settings/delete?master_password=${encodeURIComponent(password)}`, {
+            method: 'POST'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showNotification('Configuration deleted. Redirecting to setup...', 'success');
+                setTimeout(() => { window.location.href = '/setup'; }, 1500);
+            } else {
+                throw new Error(data.detail || 'Failed to delete configuration');
+            }
+        })
+        .catch(error => {
+            showNotification(error.message, 'error');
+        });
+
+        document.getElementById('delete-confirm-input').value = '';
+        document.getElementById('delete-all-btn').disabled = true;
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,1321 @@
+{% extends "base.html" %}
+
+{% block title %}Setup Wizard - Zekat Monitor{% endblock %}
+
+{% block extra_head %}
+<style>
+    .step {
+        display: none;
+    }
+    .step.active {
+        display: block;
+    }
+    .step-indicator {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 2rem;
+    }
+    .step-number {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        flex: 1;
+    }
+    .step-number.active .circle {
+        background-color: #3b82f6;
+        color: white;
+    }
+    .step-number.completed .circle {
+        background-color: #10b981;
+        color: white;
+    }
+    .circle {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        background-color: #e5e7eb;
+        margin-bottom: 0.5rem;
+        transition: all 0.3s ease;
+    }
+    .step-label {
+        font-size: 0.875rem;
+        color: #6b7280;
+        text-align: center;
+    }
+    .step-number.active .step-label,
+    .step-number.completed .step-label {
+        color: #1f2937;
+        font-weight: 500;
+    }
+    .step-connector {
+        flex: 1;
+        margin-top: 20px;
+        height: 2px;
+        background-color: #e5e7eb;
+        transition: background-color 0.3s ease;
+    }
+    .step-connector.active {
+        background-color: #3b82f6;
+    }
+    .step-connector.completed {
+        background-color: #10b981;
+    }
+    .password-strength {
+        height: 4px;
+        border-radius: 2px;
+        margin-top: 0.5rem;
+        transition: background-color 0.3s ease;
+    }
+    .source-card {
+        border: 1px solid #e5e7eb;
+        border-radius: 0.5rem;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        background-color: #f9fafb;
+    }
+    .account-pair {
+        border-left: 3px solid #e5e7eb;
+        padding-left: 1rem;
+        margin-left: 1rem;
+        margin-bottom: 0.75rem;
+        padding-bottom: 0.75rem;
+    }
+    .masked-text {
+        font-family: monospace;
+        color: #6b7280;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <!-- Step Indicator -->
+    <div class="step-indicator">
+        <div class="step-number active" id="step-1-indicator">
+            <div class="circle">1</div>
+            <div class="step-label">Master Password</div>
+        </div>
+        <div class="step-connector" id="connector-1"></div>
+        <div class="step-number" id="step-2-indicator">
+            <div class="circle">2</div>
+            <div class="step-label">Email & Accounts</div>
+        </div>
+        <div class="step-connector" id="connector-2"></div>
+        <div class="step-number" id="step-3-indicator">
+            <div class="circle">3</div>
+            <div class="step-label">Report Delivery</div>
+        </div>
+        <div class="step-connector" id="connector-3"></div>
+        <div class="step-number" id="step-4-indicator">
+            <div class="circle">4</div>
+            <div class="step-label">Settings</div>
+        </div>
+        <div class="step-connector" id="connector-4"></div>
+        <div class="step-number" id="step-5-indicator">
+            <div class="circle">5</div>
+            <div class="step-label">Review</div>
+        </div>
+    </div>
+
+    {% if restart_mode %}
+    <!-- Restart Setup Modal -->
+    <div id="restart-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-xl p-8 max-w-md w-full mx-4">
+            <h2 class="text-2xl font-bold text-gray-900 mb-4">Unlock Configuration</h2>
+            <p class="text-gray-600 mb-6">Enter your master password to modify the configuration.</p>
+            <div class="mb-6">
+                <label for="restart-password" class="block text-sm font-medium text-gray-700 mb-2">
+                    Master Password
+                </label>
+                <input
+                    type="password"
+                    id="restart-password"
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Enter your password"
+                />
+            </div>
+            <button
+                onclick="unlockConfiguration()"
+                class="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors font-medium"
+            >
+                Unlock Setup
+            </button>
+            <p id="restart-error" class="text-red-600 text-sm mt-4 hidden"></p>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Form -->
+    <form id="setup-form">
+        <!-- Hidden encryption key field -->
+        <input type="hidden" id="encryption_key" name="encryption_key" />
+
+        <!-- Step 1: Master Password -->
+        <div class="step active" id="step-1">
+            <div class="bg-white rounded-lg shadow-md p-8">
+                <h2 class="text-2xl font-bold text-gray-900 mb-6">Create Master Password</h2>
+                <p class="text-gray-600 mb-6">
+                    This password will encrypt your sensitive configuration data. Use a strong password with at least 8 characters.
+                </p>
+
+                <div class="mb-6">
+                    <label for="master-password" class="block text-sm font-medium text-gray-700 mb-2">
+                        Master Password
+                    </label>
+                    <input
+                        type="password"
+                        id="master-password"
+                        name="master_password"
+                        minlength="8"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="Minimum 8 characters"
+                        oninput="updatePasswordStrength()"
+                    />
+                    <div class="password-strength bg-gray-300" id="password-strength"></div>
+                    <p class="text-sm text-gray-500 mt-2" id="password-strength-text">Strength: weak</p>
+                </div>
+
+                <div class="mb-8">
+                    <label for="master-password-confirm" class="block text-sm font-medium text-gray-700 mb-2">
+                        Confirm Password
+                    </label>
+                    <input
+                        type="password"
+                        id="master-password-confirm"
+                        minlength="8"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="Re-enter your password"
+                        oninput="validatePasswordMatch()"
+                    />
+                    <p class="text-sm text-red-600 mt-2 hidden" id="password-mismatch-error">Passwords do not match</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 2: Email Sources & Accounts -->
+        <div class="step" id="step-2">
+            <div class="bg-white rounded-lg shadow-md p-8">
+                <h2 class="text-2xl font-bold text-gray-900 mb-6">Email Sources & Account Numbers</h2>
+                <p class="text-gray-600 mb-6">
+                    Configure one or more email sources. Each source can have multiple account pairs (BAM and EUR accounts).
+                </p>
+
+                <div id="email-sources-container">
+                    <!-- Email sources will be dynamically inserted here -->
+                </div>
+
+                <button
+                    type="button"
+                    onclick="addEmailSource()"
+                    class="mt-6 w-full bg-green-50 border-2 border-dashed border-green-300 text-green-700 py-2 px-4 rounded-lg hover:bg-green-100 transition-colors font-medium"
+                >
+                    + Add Another Email Source
+                </button>
+            </div>
+        </div>
+
+        <!-- Step 3: Report Delivery (SMTP) -->
+        <div class="step" id="step-3">
+            <div class="bg-white rounded-lg shadow-md p-8">
+                <h2 class="text-2xl font-bold text-gray-900 mb-6">Report Delivery (SMTP)</h2>
+                <p class="text-gray-600 mb-6">
+                    Configure where and how the monthly zakat report should be sent.
+                </p>
+
+                <div class="grid grid-cols-2 gap-6 mb-6">
+                    <div>
+                        <label for="smtp-server" class="block text-sm font-medium text-gray-700 mb-2">
+                            SMTP Server
+                        </label>
+                        <input
+                            type="text"
+                            id="smtp-server"
+                            name="smtp_server"
+                            value="smtp.gmail.com"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        />
+                    </div>
+                    <div>
+                        <label for="smtp-port" class="block text-sm font-medium text-gray-700 mb-2">
+                            SMTP Port
+                        </label>
+                        <input
+                            type="number"
+                            id="smtp-port"
+                            name="smtp_port"
+                            value="587"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        />
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <label for="smtp-username" class="block text-sm font-medium text-gray-700 mb-2">
+                        SMTP Username (Email)
+                    </label>
+                    <input
+                        type="email"
+                        id="smtp-username"
+                        name="smtp_username"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="your-email@gmail.com"
+                        required
+                    />
+                </div>
+
+                <div class="mb-6">
+                    <label for="smtp-password" class="block text-sm font-medium text-gray-700 mb-2">
+                        SMTP Password
+                    </label>
+                    <input
+                        type="password"
+                        id="smtp-password"
+                        name="smtp_password"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="App password or account password"
+                        required
+                    />
+                </div>
+
+                <div class="mb-6">
+                    <label for="sender-email" class="block text-sm font-medium text-gray-700 mb-2">
+                        Sender Email (From Address)
+                    </label>
+                    <input
+                        type="email"
+                        id="sender-email"
+                        name="sender_email"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="sender@example.com"
+                        required
+                    />
+                </div>
+
+                <div class="mb-6">
+                    <label for="recipient-email" class="block text-sm font-medium text-gray-700 mb-2">
+                        Recipient Email (To Address)
+                    </label>
+                    <input
+                        type="email"
+                        id="recipient-email"
+                        name="recipient_email"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="recipient@example.com"
+                        required
+                    />
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 4: Additional Settings -->
+        <div class="step" id="step-4">
+            <div class="bg-white rounded-lg shadow-md p-8">
+                <h2 class="text-2xl font-bold text-gray-900 mb-6">Additional Settings</h2>
+
+                <div class="mb-6">
+                    <label for="additional-assets" class="block text-sm font-medium text-gray-700 mb-2">
+                        Additional Assets (BAM)
+                    </label>
+                    <input
+                        type="number"
+                        id="additional-assets"
+                        name="additional_assets"
+                        value="0"
+                        step="0.01"
+                        min="0"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="0.00"
+                    />
+                    <p class="text-sm text-gray-500 mt-2">
+                        Include other assets (jewelry, cash, etc.) that should count toward nisab.
+                    </p>
+                </div>
+
+                <div class="mb-8">
+                    <label for="nisab-fallback" class="block text-sm font-medium text-gray-700 mb-2">
+                        Nisab Fallback (BAM)
+                    </label>
+                    <input
+                        type="number"
+                        id="nisab-fallback"
+                        name="nisab_fallback_bam"
+                        value="24624"
+                        step="0.01"
+                        min="0"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="24624.00"
+                    />
+                    <p class="text-sm text-gray-500 mt-2">
+                        Used if live nisab value cannot be fetched. Current default is 24,624 BAM.
+                    </p>
+                </div>
+
+                <!-- Migration Section -->
+                <div class="border-t border-gray-200 pt-8">
+                    <label class="flex items-center">
+                        <input
+                            type="checkbox"
+                            id="migration-checkbox"
+                            onchange="toggleMigrationSettings()"
+                            class="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                        />
+                        <span class="ml-3 text-sm font-medium text-gray-700">
+                            I'm migrating from another system
+                        </span>
+                    </label>
+                    <p class="text-sm text-gray-500 mt-2">
+                        If enabled, you can set the current year progress and hijri date to account for months already tracked elsewhere.
+                    </p>
+
+                    <div id="migration-settings" class="hidden mt-6 p-6 bg-blue-50 border border-blue-200 rounded-lg">
+                        <div class="mb-6">
+                            <label for="months-above-nisab" class="block text-sm font-medium text-gray-700 mb-2">
+                                Months Above Nisab (0-11)
+                            </label>
+                            <div class="flex items-center gap-4">
+                                <input
+                                    type="range"
+                                    id="months-above-nisab"
+                                    name="months_above_nisab"
+                                    min="0"
+                                    max="11"
+                                    value="0"
+                                    class="flex-1"
+                                    oninput="updateMonthsDisplay()"
+                                />
+                                <input
+                                    type="number"
+                                    id="months-above-nisab-display"
+                                    min="0"
+                                    max="11"
+                                    value="0"
+                                    class="w-16 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-center"
+                                    oninput="updateMonthsSlider()"
+                                />
+                                <span class="text-sm text-gray-600">months</span>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="hijri-date" class="block text-sm font-medium text-gray-700 mb-2">
+                                As of Hijri Date (DD/MM/YYYY)
+                            </label>
+                            <input
+                                type="text"
+                                id="hijri-date"
+                                name="hijri_date"
+                                placeholder="DD/MM/YYYY (e.g., 15/06/1446)"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            />
+                            <p class="text-sm text-gray-500 mt-2">
+                                The Hijri date as of which the months above nisab count applies.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 5: Review & Submit -->
+        <div class="step" id="step-5">
+            <div class="bg-white rounded-lg shadow-md p-8">
+                <h2 class="text-2xl font-bold text-gray-900 mb-6">Review Configuration</h2>
+                <p class="text-gray-600 mb-8">
+                    Please review your configuration before submitting. All sensitive data is masked.
+                </p>
+
+                <div id="review-content">
+                    <!-- Review content will be dynamically inserted here -->
+                </div>
+
+                <div class="mt-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <p class="text-sm text-blue-800">
+                        Once submitted, your configuration will be encrypted and stored securely. You can modify settings later if needed.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation Buttons -->
+        <div class="flex justify-between mt-8">
+            <button
+                type="button"
+                id="prev-button"
+                onclick="previousStep()"
+                class="hidden bg-gray-200 text-gray-800 py-2 px-6 rounded-lg hover:bg-gray-300 transition-colors font-medium"
+            >
+                Back
+            </button>
+            <div></div>
+            <button
+                type="button"
+                id="next-button"
+                onclick="nextStep()"
+                class="bg-blue-600 text-white py-2 px-6 rounded-lg hover:bg-blue-700 transition-colors font-medium"
+            >
+                Next
+            </button>
+            <button
+                type="button"
+                id="submit-button"
+                onclick="submitForm()"
+                class="hidden bg-green-600 text-white py-2 px-6 rounded-lg hover:bg-green-700 transition-colors font-medium"
+            >
+                Submit Setup
+            </button>
+        </div>
+    </form>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    let currentStep = 1;
+    const totalSteps = 5;
+    let restartMasterPassword = null;
+
+    // Initialize the form on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        generateEncryptionKey();
+        addEmailSource(); // Add first email source
+    });
+
+    // ==================== Encryption Key ====================
+    function generateEncryptionKey() {
+        const array = new Uint8Array(32);
+        crypto.getRandomValues(array);
+        const key = btoa(String.fromCharCode(...array));
+        document.getElementById('encryption_key').value = key;
+    }
+
+    // ==================== Step Navigation ====================
+    function goToStep(stepNumber) {
+        // Hide all steps
+        for (let i = 1; i <= totalSteps; i++) {
+            document.getElementById(`step-${i}`).classList.remove('active');
+            document.getElementById(`step-${i}-indicator`).classList.remove('active');
+            if (i < stepNumber) {
+                document.getElementById(`step-${i}-indicator`).classList.add('completed');
+            } else {
+                document.getElementById(`step-${i}-indicator`).classList.remove('completed');
+            }
+        }
+
+        // Show current step
+        document.getElementById(`step-${stepNumber}`).classList.add('active');
+        document.getElementById(`step-${stepNumber}-indicator`).classList.add('active');
+        document.getElementById(`step-${stepNumber}-indicator`).classList.remove('completed');
+
+        // Update connectors
+        for (let i = 1; i < totalSteps; i++) {
+            const connector = document.getElementById(`connector-${i}`);
+            if (i < stepNumber) {
+                connector.classList.add('completed');
+                connector.classList.remove('active');
+            } else if (i === stepNumber - 1) {
+                connector.classList.add('active');
+            } else {
+                connector.classList.remove('active', 'completed');
+            }
+        }
+
+        // Update button visibility
+        const prevButton = document.getElementById('prev-button');
+        const nextButton = document.getElementById('next-button');
+        const submitButton = document.getElementById('submit-button');
+
+        if (stepNumber === 1) {
+            prevButton.classList.add('hidden');
+        } else {
+            prevButton.classList.remove('hidden');
+        }
+
+        if (stepNumber === totalSteps) {
+            nextButton.classList.add('hidden');
+            submitButton.classList.remove('hidden');
+            generateReviewContent();
+        } else {
+            nextButton.classList.remove('hidden');
+            submitButton.classList.add('hidden');
+        }
+
+        currentStep = stepNumber;
+        window.scrollTo(0, 0);
+    }
+
+    function nextStep() {
+        if (validateCurrentStep()) {
+            goToStep(currentStep + 1);
+        }
+    }
+
+    function previousStep() {
+        goToStep(currentStep - 1);
+    }
+
+    // ==================== Validation ====================
+    function validateCurrentStep() {
+        switch (currentStep) {
+            case 1:
+                return validatePasswordStep();
+            case 2:
+                return validateEmailSourcesStep();
+            case 3:
+                return validateSmtpStep();
+            case 4:
+                return validateSettingsStep();
+            default:
+                return true;
+        }
+    }
+
+    function validatePasswordStep() {
+        const password = document.getElementById('master-password').value;
+        const passwordConfirm = document.getElementById('master-password-confirm').value;
+
+        if (password.length < 8) {
+            showNotification('Password must be at least 8 characters long', 'error');
+            return false;
+        }
+
+        if (password !== passwordConfirm) {
+            showNotification('Passwords do not match', 'error');
+            return false;
+        }
+
+        return true;
+    }
+
+    function validateEmailSourcesStep() {
+        const sources = document.querySelectorAll('.source-card');
+        if (sources.length === 0) {
+            showNotification('At least one email source is required', 'error');
+            return false;
+        }
+
+        for (let source of sources) {
+            const email = source.querySelector('[name="email"]').value;
+            const password = source.querySelector('[name="imap_password"]').value;
+            const pairs = source.querySelectorAll('.account-pair');
+
+            if (!email || !password) {
+                showNotification('Please fill in all email source fields', 'error');
+                return false;
+            }
+
+            if (pairs.length === 0) {
+                showNotification('Each email source must have at least one account pair', 'error');
+                return false;
+            }
+
+            for (let pair of pairs) {
+                const bam = pair.querySelector('[name="bam_account"]').value;
+                const eur = pair.querySelector('[name="eur_account"]').value;
+                if (!bam || !eur) {
+                    showNotification('Please fill in all account pair fields', 'error');
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    function validateSmtpStep() {
+        const smtpServer = document.getElementById('smtp-server').value;
+        const smtpPort = document.getElementById('smtp-port').value;
+        const smtpUsername = document.getElementById('smtp-username').value;
+        const smtpPassword = document.getElementById('smtp-password').value;
+        const senderEmail = document.getElementById('sender-email').value;
+        const recipientEmail = document.getElementById('recipient-email').value;
+
+        if (!smtpServer || !smtpPort || !smtpUsername || !smtpPassword || !senderEmail || !recipientEmail) {
+            showNotification('Please fill in all SMTP fields', 'error');
+            return false;
+        }
+
+        return true;
+    }
+
+    function validateSettingsStep() {
+        const migrationCheckbox = document.getElementById('migration-checkbox').checked;
+        if (migrationCheckbox) {
+            const hijriDate = document.getElementById('hijri-date').value;
+            if (!hijriDate) {
+                showNotification('Please enter a Hijri date when migration is enabled', 'error');
+                return false;
+            }
+            // Validate date format DD/MM/YYYY
+            if (!/^\d{2}\/\d{2}\/\d{4}$/.test(hijriDate)) {
+                showNotification('Please use DD/MM/YYYY format for the Hijri date', 'error');
+                return false;
+            }
+        }
+        return true;
+    }
+
+    // ==================== Password Step ====================
+    function updatePasswordStrength() {
+        const password = document.getElementById('master-password').value;
+        const strengthBar = document.getElementById('password-strength');
+        const strengthText = document.getElementById('password-strength-text');
+
+        let strength = 0;
+        if (password.length >= 8) strength++;
+        if (password.length >= 12) strength++;
+        if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength++;
+        if (/[0-9]/.test(password)) strength++;
+        if (/[^a-zA-Z0-9]/.test(password)) strength++;
+
+        const strengthLevels = ['Weak', 'Fair', 'Good', 'Strong', 'Very Strong'];
+        const strengthColors = ['bg-red-500', 'bg-yellow-500', 'bg-blue-500', 'bg-green-500', 'bg-green-600'];
+
+        strengthBar.className = `password-strength ${strengthColors[strength - 1] || 'bg-gray-300'}`;
+        strengthText.textContent = `Strength: ${strengthLevels[strength - 1] || 'Weak'}`;
+    }
+
+    function validatePasswordMatch() {
+        const password = document.getElementById('master-password').value;
+        const passwordConfirm = document.getElementById('master-password-confirm').value;
+        const errorElement = document.getElementById('password-mismatch-error');
+
+        if (passwordConfirm && password !== passwordConfirm) {
+            errorElement.classList.remove('hidden');
+        } else {
+            errorElement.classList.add('hidden');
+        }
+    }
+
+    // ==================== Email Sources & Accounts ====================
+    function addEmailSource() {
+        const container = document.getElementById('email-sources-container');
+        const sourceCount = container.querySelectorAll('.source-card').length;
+        const sourceIndex = sourceCount;
+
+        const sourceCard = document.createElement('div');
+        sourceCard.className = 'source-card';
+        sourceCard.id = `source-${sourceIndex}`;
+
+        const header = document.createElement('div');
+        header.className = 'flex justify-between items-center mb-4';
+
+        const title = document.createElement('h3');
+        title.className = 'text-lg font-semibold text-gray-900';
+        title.textContent = `Email Source ${sourceIndex + 1}`;
+
+        const removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.className = `text-red-600 hover:text-red-800 font-medium text-sm ${sourceCount <= 0 ? 'opacity-50 cursor-not-allowed' : ''}`;
+        removeBtn.textContent = 'Remove Source';
+        removeBtn.onclick = function() { removeEmailSource(sourceIndex); };
+        if (sourceCount <= 0) removeBtn.disabled = true;
+
+        header.appendChild(title);
+        header.appendChild(removeBtn);
+
+        const labelDiv = document.createElement('div');
+        labelDiv.className = 'mb-4';
+        const labelLabel = document.createElement('label');
+        labelLabel.className = 'block text-sm font-medium text-gray-700 mb-2';
+        labelLabel.textContent = 'Label (optional)';
+        const labelInput = document.createElement('input');
+        labelInput.type = 'text';
+        labelInput.name = 'source_label';
+        labelInput.className = 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm';
+        labelInput.placeholder = 'e.g. Personal, Company, Savings';
+        labelDiv.appendChild(labelLabel);
+        labelDiv.appendChild(labelInput);
+
+        const grid1 = document.createElement('div');
+        grid1.className = 'grid grid-cols-2 gap-4 mb-4';
+
+        const emailDiv = document.createElement('div');
+        const emailLabel = document.createElement('label');
+        emailLabel.className = 'block text-sm font-medium text-gray-700 mb-2';
+        emailLabel.textContent = 'Email Address';
+        const emailInput = document.createElement('input');
+        emailInput.type = 'email';
+        emailInput.name = 'email';
+        emailInput.className = 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm';
+        emailInput.placeholder = 'your-email@gmail.com';
+        emailInput.required = true;
+        emailDiv.appendChild(emailLabel);
+        emailDiv.appendChild(emailInput);
+
+        const passwordDiv = document.createElement('div');
+        const passwordLabel = document.createElement('label');
+        passwordLabel.className = 'block text-sm font-medium text-gray-700 mb-2';
+        passwordLabel.textContent = 'App Password';
+        const passwordInput = document.createElement('input');
+        passwordInput.type = 'password';
+        passwordInput.name = 'imap_password';
+        passwordInput.className = 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm';
+        passwordInput.placeholder = 'Gmail app password';
+        passwordInput.required = true;
+        passwordDiv.appendChild(passwordLabel);
+        passwordDiv.appendChild(passwordInput);
+
+        grid1.appendChild(emailDiv);
+        grid1.appendChild(passwordDiv);
+
+        const grid2 = document.createElement('div');
+        grid2.className = 'grid grid-cols-2 gap-4 mb-4';
+
+        const serverDiv = document.createElement('div');
+        const serverLabel = document.createElement('label');
+        serverLabel.className = 'block text-sm font-medium text-gray-700 mb-2';
+        serverLabel.textContent = 'IMAP Server';
+        const serverInput = document.createElement('input');
+        serverInput.type = 'text';
+        serverInput.name = 'imap_server';
+        serverInput.value = 'imap.gmail.com';
+        serverInput.className = 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm';
+        serverDiv.appendChild(serverLabel);
+        serverDiv.appendChild(serverInput);
+
+        const portDiv = document.createElement('div');
+        const portLabel = document.createElement('label');
+        portLabel.className = 'block text-sm font-medium text-gray-700 mb-2';
+        portLabel.textContent = 'IMAP Port';
+        const portInput = document.createElement('input');
+        portInput.type = 'number';
+        portInput.name = 'imap_port';
+        portInput.value = '993';
+        portInput.className = 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm';
+        portDiv.appendChild(portLabel);
+        portDiv.appendChild(portInput);
+
+        grid2.appendChild(serverDiv);
+        grid2.appendChild(portDiv);
+
+        const pairSection = document.createElement('div');
+        pairSection.className = 'mt-6 pt-4 border-t border-gray-200';
+
+        const pairTitle = document.createElement('h4');
+        pairTitle.className = 'font-semibold text-gray-900 mb-3';
+        pairTitle.textContent = 'Account Pairs';
+
+        const pairsContainer = document.createElement('div');
+        pairsContainer.className = 'account-pairs-container';
+        pairsContainer.id = `pairs-${sourceIndex}`;
+
+        const addPairBtn = document.createElement('button');
+        addPairBtn.type = 'button';
+        addPairBtn.className = 'mt-3 text-blue-600 hover:text-blue-800 font-medium text-sm';
+        addPairBtn.textContent = '+ Add Another Account Pair';
+        addPairBtn.onclick = function() { addAccountPair(sourceIndex); };
+
+        pairSection.appendChild(pairTitle);
+        pairSection.appendChild(pairsContainer);
+        pairSection.appendChild(addPairBtn);
+
+        sourceCard.appendChild(header);
+        sourceCard.appendChild(labelDiv);
+        sourceCard.appendChild(grid1);
+        sourceCard.appendChild(grid2);
+        sourceCard.appendChild(pairSection);
+
+        container.appendChild(sourceCard);
+        addAccountPair(sourceIndex); // Add first account pair
+    }
+
+    function removeEmailSource(sourceIndex) {
+        const container = document.getElementById('email-sources-container');
+        if (container.querySelectorAll('.source-card').length > 1) {
+            const source = document.getElementById(`source-${sourceIndex}`);
+            source.remove();
+        }
+    }
+
+    function addAccountPair(sourceIndex) {
+        const pairsContainer = document.getElementById(`pairs-${sourceIndex}`);
+        const pairCount = pairsContainer.querySelectorAll('.account-pair').length;
+        const pairIndex = pairCount;
+
+        const pair = document.createElement('div');
+        pair.className = 'account-pair';
+        pair.id = `pair-${sourceIndex}-${pairIndex}`;
+
+        const grid = document.createElement('div');
+        grid.className = 'grid grid-cols-2 gap-3 mb-2';
+
+        const bamDiv = document.createElement('div');
+        const bamLabel = document.createElement('label');
+        bamLabel.className = 'block text-xs font-medium text-gray-700 mb-1';
+        bamLabel.textContent = 'BAM Account';
+        const bamInput = document.createElement('input');
+        bamInput.type = 'text';
+        bamInput.name = 'bam_account';
+        bamInput.className = 'w-full px-3 py-2 border border-gray-300 rounded text-sm';
+        bamInput.placeholder = '123456789';
+        bamInput.required = true;
+        bamDiv.appendChild(bamLabel);
+        bamDiv.appendChild(bamInput);
+
+        const eurDiv = document.createElement('div');
+        const eurLabel = document.createElement('label');
+        eurLabel.className = 'block text-xs font-medium text-gray-700 mb-1';
+        eurLabel.textContent = 'EUR Account';
+        const eurInput = document.createElement('input');
+        eurInput.type = 'text';
+        eurInput.name = 'eur_account';
+        eurInput.className = 'w-full px-3 py-2 border border-gray-300 rounded text-sm';
+        eurInput.placeholder = '987654321';
+        eurInput.required = true;
+        eurDiv.appendChild(eurLabel);
+        eurDiv.appendChild(eurInput);
+
+        grid.appendChild(bamDiv);
+        grid.appendChild(eurDiv);
+
+        const removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.className = `text-red-500 hover:text-red-700 text-xs font-medium ${pairCount <= 1 ? 'opacity-50 cursor-not-allowed' : ''}`;
+        removeBtn.textContent = 'Remove Pair';
+        removeBtn.onclick = function() { removeAccountPair(sourceIndex, pairIndex); };
+        if (pairCount <= 1) removeBtn.disabled = true;
+
+        pair.appendChild(grid);
+        pair.appendChild(removeBtn);
+        pairsContainer.appendChild(pair);
+    }
+
+    function removeAccountPair(sourceIndex, pairIndex) {
+        const pairsContainer = document.getElementById(`pairs-${sourceIndex}`);
+        if (pairsContainer.querySelectorAll('.account-pair').length > 1) {
+            const pair = document.getElementById(`pair-${sourceIndex}-${pairIndex}`);
+            pair.remove();
+        }
+    }
+
+    // ==================== Migration Settings ====================
+    function toggleMigrationSettings() {
+        const checkbox = document.getElementById('migration-checkbox').checked;
+        const settings = document.getElementById('migration-settings');
+        if (checkbox) {
+            settings.classList.remove('hidden');
+        } else {
+            settings.classList.add('hidden');
+        }
+    }
+
+    function updateMonthsDisplay() {
+        const slider = document.getElementById('months-above-nisab').value;
+        document.getElementById('months-above-nisab-display').value = slider;
+    }
+
+    function updateMonthsSlider() {
+        const input = document.getElementById('months-above-nisab-display').value;
+        if (input >= 0 && input <= 11) {
+            document.getElementById('months-above-nisab').value = input;
+        }
+    }
+
+    // ==================== Review ====================
+    function generateReviewContent() {
+        const reviewContent = document.getElementById('review-content');
+        reviewContent.innerHTML = '';
+
+        // Master password
+        const masterPassword = document.getElementById('master-password').value;
+        const masterPasswordMasked = '*'.repeat(masterPassword.length);
+
+        const passwordSection = document.createElement('section');
+        const passwordTitle = document.createElement('h3');
+        passwordTitle.className = 'text-lg font-semibold text-gray-900 mb-4 mt-8';
+        passwordTitle.textContent = 'Master Password';
+        const passwordBox = document.createElement('div');
+        passwordBox.className = 'mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200';
+        const passwordP = document.createElement('p');
+        passwordP.className = 'text-sm text-gray-700';
+        passwordP.textContent = 'Password: ';
+        const passwordSpan = document.createElement('span');
+        passwordSpan.className = 'masked-text';
+        passwordSpan.textContent = masterPasswordMasked;
+        passwordP.appendChild(passwordSpan);
+        passwordBox.appendChild(passwordP);
+        reviewContent.appendChild(passwordTitle);
+        reviewContent.appendChild(passwordBox);
+
+        // Email sources
+        const emailTitle = document.createElement('h3');
+        emailTitle.className = 'text-lg font-semibold text-gray-900 mb-4 mt-8';
+        emailTitle.textContent = 'Email Sources & Accounts';
+        reviewContent.appendChild(emailTitle);
+
+        const sources = document.querySelectorAll('.source-card');
+        sources.forEach((source, sourceIdx) => {
+            const label = source.querySelector('[name="source_label"]').value;
+            const email = source.querySelector('[name="email"]').value;
+            const server = source.querySelector('[name="imap_server"]').value;
+            const port = source.querySelector('[name="imap_port"]').value;
+            const password = source.querySelector('[name="imap_password"]').value;
+            const passwordMasked = '*'.repeat(Math.max(3, Math.min(password.length - 2, 8))) + (password.length > 2 ? password.slice(-2) : '');
+
+            const sourceBox = document.createElement('div');
+            sourceBox.className = 'mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200';
+
+            const sourceTitle = document.createElement('h4');
+            sourceTitle.className = 'font-semibold text-gray-900 mb-2';
+            sourceTitle.textContent = label ? `${label} (${maskEmail(email)})` : `Source ${sourceIdx + 1}: ${maskEmail(email)}`;
+            sourceBox.appendChild(sourceTitle);
+
+            const imapP = document.createElement('p');
+            imapP.className = 'text-sm text-gray-600 mb-2';
+            imapP.textContent = `IMAP: ${server}:${port}`;
+            sourceBox.appendChild(imapP);
+
+            const passP = document.createElement('p');
+            passP.className = 'text-sm text-gray-600 mb-3';
+            passP.textContent = 'Password: ';
+            const passSpan = document.createElement('span');
+            passSpan.className = 'masked-text';
+            passSpan.textContent = passwordMasked;
+            passP.appendChild(passSpan);
+            sourceBox.appendChild(passP);
+
+            const pairsDiv = document.createElement('div');
+            pairsDiv.className = 'space-y-2';
+
+            const pairs = source.querySelectorAll('.account-pair');
+            pairs.forEach((pair, pairIdx) => {
+                const bam = pair.querySelector('[name="bam_account"]').value;
+                const eur = pair.querySelector('[name="eur_account"]').value;
+                const pairP = document.createElement('p');
+                pairP.className = 'text-sm text-gray-700';
+                const pairLabel = document.createElement('span');
+                pairLabel.className = 'font-medium';
+                pairLabel.textContent = `Pair ${pairIdx + 1}: `;
+                const bamSpan = document.createElement('span');
+                bamSpan.className = 'masked-text';
+                bamSpan.textContent = `${maskAccount(bam)}`;
+                const eurSpan = document.createElement('span');
+                eurSpan.className = 'masked-text';
+                eurSpan.textContent = `${maskAccount(eur)}`;
+
+                pairP.appendChild(pairLabel);
+                pairP.appendChild(document.createTextNode('BAM: '));
+                pairP.appendChild(bamSpan);
+                pairP.appendChild(document.createTextNode(' | EUR: '));
+                pairP.appendChild(eurSpan);
+
+                pairsDiv.appendChild(pairP);
+            });
+
+            sourceBox.appendChild(pairsDiv);
+            reviewContent.appendChild(sourceBox);
+        });
+
+        // SMTP
+        const smtpTitle = document.createElement('h3');
+        smtpTitle.className = 'text-lg font-semibold text-gray-900 mb-4 mt-8';
+        smtpTitle.textContent = 'Report Delivery (SMTP)';
+        reviewContent.appendChild(smtpTitle);
+
+        const smtpServer = document.getElementById('smtp-server').value;
+        const smtpPort = document.getElementById('smtp-port').value;
+        const smtpUsername = document.getElementById('smtp-username').value;
+        const smtpPassword = document.getElementById('smtp-password').value;
+        const senderEmail = document.getElementById('sender-email').value;
+        const recipientEmail = document.getElementById('recipient-email').value;
+        const smtpPasswordMasked = '*'.repeat(Math.max(3, Math.min(smtpPassword.length - 2, 8))) + (smtpPassword.length > 2 ? smtpPassword.slice(-2) : '');
+
+        const smtpBox = document.createElement('div');
+        smtpBox.className = 'mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200';
+
+        const smtpServerP = document.createElement('p');
+        smtpServerP.className = 'text-sm text-gray-700 mb-2';
+        smtpServerP.innerHTML = `<span class="font-medium">Server:</span> ${smtpServer}:${smtpPort}`;
+        smtpBox.appendChild(smtpServerP);
+
+        const userP = document.createElement('p');
+        userP.className = 'text-sm text-gray-700 mb-2';
+        userP.textContent = 'Username: ';
+        const userSpan = document.createElement('span');
+        userSpan.textContent = maskEmail(smtpUsername);
+        userP.innerHTML = `<span class="font-medium">Username:</span> ${maskEmail(smtpUsername)}`;
+        smtpBox.appendChild(userP);
+
+        const smtpPassP = document.createElement('p');
+        smtpPassP.className = 'text-sm text-gray-700 mb-2';
+        smtpPassP.textContent = 'Password: ';
+        const smtpPassSpan = document.createElement('span');
+        smtpPassSpan.className = 'masked-text';
+        smtpPassSpan.textContent = smtpPasswordMasked;
+        smtpPassP.innerHTML = `<span class="font-medium">Password:</span> <span class="masked-text">${smtpPasswordMasked}</span>`;
+        smtpBox.appendChild(smtpPassP);
+
+        const fromP = document.createElement('p');
+        fromP.className = 'text-sm text-gray-700 mb-2';
+        fromP.innerHTML = `<span class="font-medium">From:</span> ${maskEmail(senderEmail)}`;
+        smtpBox.appendChild(fromP);
+
+        const toP = document.createElement('p');
+        toP.className = 'text-sm text-gray-700';
+        toP.innerHTML = `<span class="font-medium">To:</span> ${maskEmail(recipientEmail)}`;
+        smtpBox.appendChild(toP);
+
+        reviewContent.appendChild(smtpBox);
+
+        // Settings
+        const settingsTitle = document.createElement('h3');
+        settingsTitle.className = 'text-lg font-semibold text-gray-900 mb-4 mt-8';
+        settingsTitle.textContent = 'Settings';
+        reviewContent.appendChild(settingsTitle);
+
+        const settingsBox = document.createElement('div');
+        settingsBox.className = 'mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200';
+
+        const additionalAssets = document.getElementById('additional-assets').value || '0';
+        const nisabFallback = document.getElementById('nisab-fallback').value || '24624';
+        const migrationEnabled = document.getElementById('migration-checkbox').checked;
+
+        const assetsP = document.createElement('p');
+        assetsP.className = 'text-sm text-gray-700 mb-2';
+        assetsP.innerHTML = `<span class="font-medium">Additional Assets (BAM):</span> ${additionalAssets}`;
+        settingsBox.appendChild(assetsP);
+
+        const nisabP = document.createElement('p');
+        nisabP.className = 'text-sm text-gray-700';
+        nisabP.innerHTML = `<span class="font-medium">Nisab Fallback (BAM):</span> ${nisabFallback}`;
+        settingsBox.appendChild(nisabP);
+
+        if (migrationEnabled) {
+            const migrationP = document.createElement('p');
+            migrationP.className = 'text-sm text-gray-700 mt-2';
+            migrationP.innerHTML = '<span class="font-medium">Migration Enabled:</span> Yes';
+            settingsBox.appendChild(migrationP);
+
+            const monthsAboveNisab = document.getElementById('months-above-nisab').value;
+            const hijriDate = document.getElementById('hijri-date').value;
+
+            const monthsP = document.createElement('p');
+            monthsP.className = 'text-sm text-gray-700';
+            monthsP.innerHTML = `<span class="font-medium">Months Above Nisab:</span> ${monthsAboveNisab}`;
+            settingsBox.appendChild(monthsP);
+
+            const dateP = document.createElement('p');
+            dateP.className = 'text-sm text-gray-700';
+            dateP.innerHTML = `<span class="font-medium">As of Hijri Date:</span> ${hijriDate}`;
+            settingsBox.appendChild(dateP);
+        } else {
+            const migrationP = document.createElement('p');
+            migrationP.className = 'text-sm text-gray-700 mt-2';
+            migrationP.innerHTML = '<span class="font-medium">Migration:</span> Disabled';
+            settingsBox.appendChild(migrationP);
+        }
+
+        reviewContent.appendChild(settingsBox);
+    }
+
+    function maskEmail(email) {
+        if (!email) return '';
+        const [name, domain] = email.split('@');
+        return name.charAt(0) + '*'.repeat(Math.max(1, name.length - 2)) + '@' + domain;
+    }
+
+    function maskAccount(account) {
+        if (!account) return '';
+        return '*'.repeat(Math.max(1, account.length - 4)) + account.slice(-4);
+    }
+
+    // ==================== Form Submission ====================
+    function submitForm() {
+        // Build JSON payload
+        const payload = {
+            master_password: document.getElementById('master-password').value,
+            email_sources: [],
+            report_delivery: {
+                smtp_server: document.getElementById('smtp-server').value,
+                smtp_port: parseInt(document.getElementById('smtp-port').value),
+                username: document.getElementById('smtp-username').value,
+                password: document.getElementById('smtp-password').value,
+                sender_email: document.getElementById('sender-email').value,
+                recipient_email: document.getElementById('recipient-email').value
+            },
+            encryption_key: document.getElementById('encryption_key').value,
+            additional_assets: parseFloat(document.getElementById('additional-assets').value || 0),
+            nisab_fallback_bam: parseFloat(document.getElementById('nisab-fallback').value || 24624)
+        };
+
+        // Collect email sources
+        const sources = document.querySelectorAll('.source-card');
+        sources.forEach(source => {
+            const emailSource = {
+                label: source.querySelector('[name="source_label"]').value || '',
+                email: source.querySelector('[name="email"]').value,
+                password: source.querySelector('[name="imap_password"]').value,
+                imap_server: source.querySelector('[name="imap_server"]').value,
+                imap_port: parseInt(source.querySelector('[name="imap_port"]').value),
+                account_pairs: []
+            };
+
+            const pairs = source.querySelectorAll('.account-pair');
+            pairs.forEach(pair => {
+                emailSource.account_pairs.push({
+                    bam_account: pair.querySelector('[name="bam_account"]').value,
+                    eur_account: pair.querySelector('[name="eur_account"]').value
+                });
+            });
+
+            payload.email_sources.push(emailSource);
+        });
+
+        // Add migration settings if enabled
+        if (document.getElementById('migration-checkbox').checked) {
+            payload.year_progress_override = {
+                enabled: true,
+                months_above_nisab: parseInt(document.getElementById('months-above-nisab').value),
+                as_of_hijri_date: document.getElementById('hijri-date').value
+            };
+        }
+
+        // Submit form
+        submitSetupForm(payload);
+    }
+
+    function submitSetupForm(payload) {
+        const button = document.getElementById('submit-button');
+        const originalText = button.textContent;
+        button.disabled = true;
+        button.textContent = 'Submitting...';
+
+        fetch('/api/setup', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        })
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(data => {
+                    throw new Error(data.error || 'Setup failed');
+                });
+            }
+            return response.json();
+        })
+        .then(data => {
+            showNotification('Setup completed successfully!', 'success');
+            setTimeout(() => {
+                window.location.href = '/';
+            }, 1000);
+        })
+        .catch(error => {
+            showNotification(error.message || 'An error occurred during setup', 'error');
+            button.disabled = false;
+            button.textContent = originalText;
+        });
+    }
+
+    // ==================== Restart Mode ====================
+    function unlockConfiguration() {
+        const password = document.getElementById('restart-password').value;
+        if (!password) {
+            showError('Please enter your password');
+            return;
+        }
+
+        fetch('/api/settings/restart-setup', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ master_password: password })
+        })
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(data => {
+                    throw new Error(data.detail || 'Invalid password');
+                });
+            }
+            return response.json();
+        })
+        .then(data => {
+            // Hide modal
+            const modal = document.getElementById('restart-modal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+
+            // Store the password for later use and pre-fill form
+            restartMasterPassword = password;
+            storePassword(password);
+            prefillForm(data.config, password);
+
+            showNotification('Configuration unlocked', 'success');
+        })
+        .catch(error => {
+            showError(error.message);
+        });
+    }
+
+    function showError(message) {
+        const errorElement = document.getElementById('restart-error');
+        errorElement.textContent = message;
+        errorElement.classList.remove('hidden');
+        setTimeout(() => {
+            errorElement.classList.add('hidden');
+        }, 5000);
+    }
+
+    function prefillForm(config, masterPassword) {
+        // Pre-fill master password with the actual password used to unlock
+        document.getElementById('master-password').value = masterPassword;
+        document.getElementById('master-password-confirm').value = masterPassword;
+        updatePasswordStrength();
+
+        // Pre-fill SMTP
+        document.getElementById('smtp-server').value = config.report_delivery.smtp_server;
+        document.getElementById('smtp-port').value = config.report_delivery.smtp_port;
+        document.getElementById('smtp-username').value = config.report_delivery.username;
+        document.getElementById('smtp-password').value = config.report_delivery.password;
+        document.getElementById('sender-email').value = config.report_delivery.sender_email;
+        document.getElementById('recipient-email').value = config.report_delivery.recipient_email;
+
+        // Pre-fill settings
+        document.getElementById('additional-assets').value = config.additional_assets || 0;
+        document.getElementById('nisab-fallback').value = config.nisab_fallback_bam || 24624;
+
+        // Pre-fill encryption key (do not regenerate)
+        document.getElementById('encryption_key').value = config.encryption_key;
+
+        // Pre-fill email sources
+        const container = document.getElementById('email-sources-container');
+        container.innerHTML = '';
+        config.email_sources.forEach((source, idx) => {
+            addEmailSource();
+            const sourceCard = document.getElementById(`source-${idx}`);
+            sourceCard.querySelector('[name="source_label"]').value = source.label || '';
+            sourceCard.querySelector('[name="email"]').value = source.email;
+            sourceCard.querySelector('[name="imap_password"]').value = source.password;
+            sourceCard.querySelector('[name="imap_server"]').value = source.imap_server;
+            sourceCard.querySelector('[name="imap_port"]').value = source.imap_port;
+
+            // Pre-fill account pairs
+            const pairsContainer = sourceCard.querySelector(`#pairs-${idx}`);
+            pairsContainer.innerHTML = '';
+            source.account_pairs.forEach((pair, pairIdx) => {
+                addAccountPair(idx);
+                const pairElement = document.getElementById(`pair-${idx}-${pairIdx}`);
+                pairElement.querySelector('[name="bam_account"]').value = pair.bam_account;
+                pairElement.querySelector('[name="eur_account"]').value = pair.eur_account;
+            });
+        });
+
+        // Pre-fill migration settings if present
+        if (config.year_progress_override && config.year_progress_override.enabled) {
+            document.getElementById('migration-checkbox').checked = true;
+            toggleMigrationSettings();
+            document.getElementById('months-above-nisab').value = config.year_progress_override.months_above_nisab;
+            document.getElementById('months-above-nisab-display').value = config.year_progress_override.months_above_nisab;
+            document.getElementById('hijri-date').value = config.year_progress_override.as_of_hijri_date;
+        }
+    }
+</script>
+{% endblock %}
