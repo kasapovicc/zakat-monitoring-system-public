@@ -1,0 +1,79 @@
+name: Zakat Monitor
+
+on:
+  schedule:
+    # Run on the first Monday of each month at 10:00 AM UTC
+    # Cron runs every Monday; the job checks if it's the 1st-7th (first Monday)
+    - cron: '0 10 * * 1'
+  workflow_dispatch: # Allow manual triggering
+    inputs:
+      mark_paid:
+        description: 'Mark zakat as paid (resets the 12-month cycle)'
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: write  # Required to commit history files back to repository
+  actions: read
+  
+jobs:
+  zakat-analysis:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Check if first Monday of month
+      if: github.event_name == 'schedule'
+      run: |
+        DAY=$(date -u +%d)
+        if [ "$DAY" -gt 7 ]; then
+          echo "Not the first Monday of the month (day=$DAY), skipping."
+          exit 1
+        fi
+        echo "First Monday of the month (day=$DAY), proceeding."
+
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        fetch-depth: 0  # Fetch full history for git operations
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Run Zakat Monitor
+      env:
+        EMAIL_USERNAME: ${{ secrets.EMAIL_USERNAME }}
+        EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
+        SENDER_EMAIL: ${{ secrets.SENDER_EMAIL }}
+        RECIPIENT_EMAIL: ${{ secrets.RECIPIENT_EMAIL }}
+        ZAKAT_ENCRYPTION_KEY: ${{ secrets.ZAKAT_ENCRYPTION_KEY }}
+        NISAB_FALLBACK_BAM: ${{ secrets.NISAB_FALLBACK_BAM }}
+        ADDITIONAL_ASSETS: ${{ secrets.ADDITIONAL_ASSETS }}
+        GITHUB_ACTIONS: true  # Flag to enable GitHub Actions mode
+        BAM_ACCOUNT: ${{ secrets.BAM_ACCOUNT }}
+        EUR_ACCOUNT: ${{ secrets.EUR_ACCOUNT }}
+        ACCOUNT_HOLDER_NAME: ${{ secrets.ACCOUNT_HOLDER_NAME }}
+        COMPANY_EMAIL_USERNAME: ${{ secrets.COMPANY_EMAIL_USERNAME }}
+        COMPANY_EMAIL_PASSWORD: ${{ secrets.COMPANY_EMAIL_PASSWORD }}
+        COMPANY_BAM_ACCOUNT: ${{ secrets.COMPANY_BAM_ACCOUNT }}
+        COMPANY_EUR_ACCOUNT: ${{ secrets.COMPANY_EUR_ACCOUNT }}
+        MARK_PAID: ${{ github.event.inputs.mark_paid }}
+      run: python zakat_monitor.py
+    
+    - name: Upload artifacts (optional - for debugging)
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: zakat-logs
+        path: |
+          *.log
+          *.json
+        retention-days: 30
