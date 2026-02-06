@@ -1,0 +1,19 @@
+zakat_encryption.key 
+zakat_monitor.log
+zakat_report_artifact.json
+zakat_history.json
+*.pdf
+__pycache__/
+*.pyc
+.env
+.guides
+
+# Build artifacts
+build/
+dist/
+
+# Claude Code
+.claude/
+.DS_Store
+CLAUDE.md
+.guides/

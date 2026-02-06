@@ -1,0 +1,30 @@
+# Zekat macOS App Dependencies
+# Requires Python 3.11+
+
+# Web framework and server
+fastapi==0.128.0
+uvicorn[standard]==0.40.0
+
+# GUI components (macOS only)
+pywebview==6.1; sys_platform == 'darwin'
+rumps==0.4.0; sys_platform == 'darwin'
+
+# Scheduling
+APScheduler==3.11.2
+
+# Encryption and security
+argon2-cffi==25.1.0
+cryptography==43.0.1
+
+# SSL certificates for bundled app
+certifi>=2024.1.0
+
+# Templating and forms
+jinja2==3.1.6
+python-multipart==0.0.22
+
+# HTTP client for nisab fetching
+httpx==0.28.1
+
+# Hijri calendar support (for scheduler)
+hijri-converter==2.3.1

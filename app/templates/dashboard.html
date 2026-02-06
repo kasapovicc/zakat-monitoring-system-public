@@ -1,0 +1,524 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Zekat Monitor{% endblock %}
+
+{% block content %}
+<div class="space-y-6 fade-in">
+    <!-- Page Header -->
+    <div class="flex justify-between items-center">
+        <h2 class="text-2xl font-bold text-gray-900">Zakat Dashboard</h2>
+        <div class="flex space-x-3">
+            <button onclick="runAnalysis()"
+                    class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium">
+                Run Analysis Now
+            </button>
+            <button id="mark-paid-btn" onclick="showMarkPaidModal()"
+                    class="hidden bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 font-medium">
+                Mark Zakat Paid
+            </button>
+        </div>
+    </div>
+
+    <!-- Status Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Total Assets Card -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-600">Total Assets</p>
+                    <p class="text-3xl font-bold text-gray-900 mt-2" id="total-assets">—</p>
+                    <p class="text-xs text-gray-400 mt-1" id="total-assets-note"></p>
+                </div>
+                <div class="bg-blue-100 rounded-full p-3">
+                    <svg class="h-8 w-8 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- Additional Assets Card -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-600">Additional Assets</p>
+                    <p class="text-3xl font-bold text-gray-900 mt-2" id="additional-assets">—</p>
+                </div>
+                <div class="bg-green-100 rounded-full p-3">
+                    <svg class="h-8 w-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- Nisab Threshold Card -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-600">Nisab Fallback Threshold</p>
+                    <p class="text-3xl font-bold text-gray-900 mt-2" id="nisab-threshold">—</p>
+                </div>
+                <div class="bg-purple-100 rounded-full p-3">
+                    <svg class="h-8 w-8 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Source Breakdown -->
+    <div id="sources-section" class="hidden">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Account Sources</h3>
+        <div id="sources-container" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            <!-- Source cards inserted dynamically -->
+        </div>
+    </div>
+
+    <!-- Hijri Year Progress -->
+    <div class="bg-white rounded-lg shadow p-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Hijri Year Progress</h3>
+        <div class="space-y-3">
+            <div class="flex justify-between text-sm">
+                <span class="text-gray-600">Consecutive Months Above Nisab</span>
+                <span class="font-medium text-gray-900" id="consecutive-months">— / 12 months</span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-3">
+                <div class="bg-blue-600 h-3 rounded-full transition-all duration-300"
+                     id="hijri-progress-bar" style="width: 0%"></div>
+            </div>
+            <div id="year-progress-source" class="text-xs text-gray-500 mt-1"></div>
+        </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="bg-white rounded-lg shadow p-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Recent Activity</h3>
+        <div class="space-y-3" id="recent-activity">
+            <div class="text-center py-4 text-gray-500">
+                <p>Enter your master password to load dashboard data.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Password Modal -->
+<div id="password-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div class="mt-3">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Enter Master Password</h3>
+            <form id="password-form" class="space-y-4">
+                <div>
+                    <input type="password" id="master-password" required placeholder="Master password"
+                           class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2 border">
+                </div>
+                <div class="flex justify-end space-x-3">
+                    <button type="submit"
+                            class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                        Load Dashboard
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Mark Paid Modal -->
+<div id="mark-paid-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div class="mt-3">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Mark Zakat as Paid</h3>
+            <form id="mark-paid-form" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Master Password</label>
+                    <input type="password" id="mark-paid-password" required
+                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2 border">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Amount (BAM)</label>
+                    <input type="number" id="mark-paid-amount" step="0.01" min="0.01" required
+                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2 border">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Hijri Date (DD/MM/YYYY)</label>
+                    <input type="text" id="mark-paid-date" placeholder="01/01/1446" required
+                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2 border">
+                </div>
+                <div class="flex justify-end space-x-3 mt-6">
+                    <button type="button" onclick="hideMarkPaidModal()"
+                            class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300">
+                        Cancel
+                    </button>
+                    <button type="submit"
+                            class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">
+                        Confirm Payment
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    // Try cached password on load
+    window.addEventListener('DOMContentLoaded', function() {
+        const cached = getStoredPassword();
+        if (cached) {
+            loadDashboard(cached);
+        }
+    });
+
+    document.getElementById('password-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const password = document.getElementById('master-password').value;
+        loadDashboard(password);
+    });
+
+    function loadDashboard(password) {
+        const params = new URLSearchParams({ master_password: password });
+
+        fetch(`/api/settings/full?${params}`)
+            .then(response => response.json())
+            .then(resp => {
+                if (resp.success) {
+                    storePassword(password);
+                    document.getElementById('password-modal').classList.add('hidden');
+                    populateDashboard(resp.data);
+                } else {
+                    throw new Error(resp.detail || 'Failed to load settings');
+                }
+            })
+            .catch(error => {
+                // If cached password expired/wrong, show modal
+                clearStoredPassword();
+                document.getElementById('password-modal').classList.remove('hidden');
+                showNotification(error.message, 'error');
+            });
+    }
+
+    function populateDashboard(settings) {
+        // Additional Assets
+        const additionalAssets = settings.additional_assets || 0;
+        document.getElementById('additional-assets').textContent =
+            additionalAssets.toFixed(2) + ' BAM';
+
+        // Total Assets (additional only until analysis runs)
+        document.getElementById('total-assets').textContent =
+            additionalAssets.toFixed(2) + ' BAM';
+        document.getElementById('total-assets-note').textContent =
+            'Additional assets only. Run analysis for full total.';
+
+        // Nisab Fallback
+        const nisabFallback = settings.nisab_fallback_bam || 24624.0;
+        document.getElementById('nisab-threshold').textContent =
+            nisabFallback.toFixed(2) + ' BAM';
+
+        // Year Progress Override
+        const override = settings.year_progress_override;
+        if (override && override.enabled) {
+            const months = override.months_above_nisab || 0;
+            document.getElementById('consecutive-months').textContent = months + ' / 12 months';
+            document.getElementById('hijri-progress-bar').style.width = ((months / 12) * 100) + '%';
+            document.getElementById('year-progress-source').textContent =
+                'From year progress override (as of ' + override.as_of_hijri_date + ')';
+        } else {
+            document.getElementById('consecutive-months').textContent = '0 / 12 months';
+            document.getElementById('hijri-progress-bar').style.width = '0%';
+            document.getElementById('year-progress-source').textContent =
+                'No year progress override set. Run analysis to track automatically.';
+        }
+
+        // Show source cards from config
+        populateSourceCards(settings.email_sources || []);
+
+        // Try to load last analysis result for balances
+        loadLastAnalysisResult(settings);
+
+        // Recent activity
+        const activityDiv = document.getElementById('recent-activity');
+        activityDiv.textContent = '';
+        const p = document.createElement('div');
+        p.className = 'text-center py-4 text-gray-500';
+        p.textContent = 'Run an analysis to see recent activity.';
+        activityDiv.appendChild(p);
+    }
+
+    function populateSourceCards(emailSources) {
+        const section = document.getElementById('sources-section');
+        const container = document.getElementById('sources-container');
+        container.textContent = '';
+
+        if (emailSources.length === 0) return;
+        section.classList.remove('hidden');
+
+        emailSources.forEach((source, index) => {
+            const card = document.createElement('div');
+            card.className = 'bg-white rounded-lg shadow p-5';
+            card.id = 'source-card-' + index;
+
+            const header = document.createElement('div');
+            header.className = 'flex items-center justify-between mb-3';
+
+            const label = document.createElement('h4');
+            label.className = 'text-sm font-semibold text-gray-900';
+            label.textContent = source.label || 'Source ' + (index + 1);
+
+            const emailBadge = document.createElement('span');
+            emailBadge.className = 'text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded';
+            emailBadge.textContent = source.email;
+
+            header.appendChild(label);
+            header.appendChild(emailBadge);
+            card.appendChild(header);
+
+            const pairs = source.account_pairs || [];
+            pairs.forEach(pair => {
+                const pairDiv = document.createElement('div');
+                pairDiv.className = 'flex justify-between items-center py-2 border-t border-gray-100';
+
+                const accountsDiv = document.createElement('div');
+                accountsDiv.className = 'text-xs text-gray-500';
+                accountsDiv.textContent = 'BAM: ' + pair.bam_account + ' / EUR: ' + pair.eur_account;
+
+                const balanceDiv = document.createElement('div');
+                balanceDiv.className = 'text-right source-balance';
+                balanceDiv.setAttribute('data-source-index', index);
+
+                const pendingP = document.createElement('p');
+                pendingP.className = 'text-xs text-gray-400 italic';
+                pendingP.textContent = 'Run analysis for balances';
+                balanceDiv.appendChild(pendingP);
+
+                pairDiv.appendChild(accountsDiv);
+                pairDiv.appendChild(balanceDiv);
+                card.appendChild(pairDiv);
+            });
+
+            // Source total row
+            const totalDiv = document.createElement('div');
+            totalDiv.className = 'flex justify-between items-center pt-3 mt-1 border-t-2 border-gray-200';
+            totalDiv.id = 'source-total-' + index;
+
+            const totalLabel = document.createElement('span');
+            totalLabel.className = 'text-sm font-medium text-gray-700';
+            totalLabel.textContent = 'Source Total';
+
+            const totalValue = document.createElement('span');
+            totalValue.className = 'text-sm font-bold text-gray-900';
+            totalValue.textContent = '—';
+
+            totalDiv.appendChild(totalLabel);
+            totalDiv.appendChild(totalValue);
+            card.appendChild(totalDiv);
+
+            container.appendChild(card);
+        });
+    }
+
+    function loadLastAnalysisResult(settings) {
+        fetch('/api/analyze/result')
+            .then(r => r.json())
+            .then(data => {
+                if (data.success && data.data) {
+                    applyAnalysisResult(data.data, settings);
+                }
+            })
+            .catch(() => {});
+    }
+
+    function applyAnalysisResult(result, settings) {
+        // Update top-level cards
+        const totalAssets = result.total_assets || 0;
+        document.getElementById('total-assets').textContent = totalAssets.toFixed(2) + ' BAM';
+        document.getElementById('total-assets-note').textContent =
+            'Bank: ' + (result.bank_balance || 0).toFixed(2) + ' + Additional: ' + (result.additional_assets || 0).toFixed(2);
+
+        if (result.nisab_threshold) {
+            document.getElementById('nisab-threshold').textContent =
+                result.nisab_threshold.toFixed(2) + ' BAM';
+        }
+
+        // Update year progress from analysis
+        const months = result.consecutive_months_above_nisab || 0;
+        document.getElementById('consecutive-months').textContent = months + ' / 12 months';
+        document.getElementById('hijri-progress-bar').style.width = ((months / 12) * 100) + '%';
+        document.getElementById('year-progress-source').textContent = 'From last analysis';
+
+        // Show "Mark Zakat Paid" button only when 12-month threshold is met
+        const markPaidBtn = document.getElementById('mark-paid-btn');
+        if (months >= 12) {
+            markPaidBtn.classList.remove('hidden');
+        } else {
+            markPaidBtn.classList.add('hidden');
+        }
+
+        // Populate recent activity
+        updateRecentActivity(result);
+
+        // Update source cards with balances
+        const sources = result.sources || [];
+        sources.forEach((src, index) => {
+            const card = document.getElementById('source-card-' + index);
+            if (!card) return;
+
+            // Replace the pending balance text with actual values
+            const balanceDivs = card.querySelectorAll('.source-balance');
+            if (balanceDivs.length > 0) {
+                const balanceDiv = balanceDivs[0];
+                balanceDiv.textContent = '';
+
+                const bamP = document.createElement('p');
+                bamP.className = 'text-sm font-medium text-gray-900';
+                bamP.textContent = (src.bam_balance || 0).toFixed(2) + ' BAM';
+
+                const eurP = document.createElement('p');
+                eurP.className = 'text-xs text-gray-600';
+                eurP.textContent = (src.eur_balance || 0).toFixed(2) + ' EUR';
+
+                balanceDiv.appendChild(bamP);
+                balanceDiv.appendChild(eurP);
+            }
+
+            // Update source total
+            const totalDiv = document.getElementById('source-total-' + index);
+            if (totalDiv) {
+                const totalValue = totalDiv.querySelector('.font-bold');
+                if (totalValue) {
+                    totalValue.textContent = (src.total_bam || 0).toFixed(2) + ' BAM';
+                }
+            }
+        });
+    }
+
+    function runAnalysis() {
+        const password = getStoredPassword() || prompt('Enter your master password:');
+        if (!password) return;
+
+        fetch('/api/analyze', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ master_password: password })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showNotification('Analysis started! Check the Analysis page for progress.', 'success');
+                setTimeout(() => window.location.href = '/analysis', 1500);
+            } else {
+                throw new Error(data.message || 'Failed to start analysis');
+            }
+        })
+        .catch(error => {
+            showNotification(error.message, 'error');
+        });
+    }
+
+    function updateRecentActivity(result) {
+        const activityDiv = document.getElementById('recent-activity');
+        activityDiv.textContent = '';
+
+        const items = [];
+
+        // Last analysis summary
+        if (result.total_assets) {
+            items.push({
+                icon: 'text-blue-500',
+                text: 'Analysis completed - Total assets: ' + result.total_assets.toFixed(2) + ' BAM'
+            });
+        }
+        if (result.above_nisab !== undefined) {
+            items.push({
+                icon: result.above_nisab ? 'text-green-500' : 'text-red-500',
+                text: result.above_nisab ? 'Balance is above nisab threshold' : 'Balance is below nisab threshold'
+            });
+        }
+        const months = result.consecutive_months_above_nisab || 0;
+        items.push({
+            icon: months >= 12 ? 'text-green-500' : 'text-yellow-500',
+            text: months >= 12
+                ? 'Zakat is due! 12-month threshold reached.'
+                : 'Year progress: ' + months + ' of 12 consecutive months above nisab'
+        });
+
+        // Per-source breakdown
+        const sources = result.sources || [];
+        sources.forEach(src => {
+            const name = src.source_name || 'Source';
+            const total = (src.bam_balance_in_bam || 0) + (src.eur_balance_in_bam || 0);
+            items.push({
+                icon: 'text-gray-400',
+                text: name + ': ' + total.toFixed(2) + ' BAM'
+            });
+        });
+
+        if (items.length === 0) {
+            const p = document.createElement('div');
+            p.className = 'text-center py-4 text-gray-500';
+            p.textContent = 'Run an analysis to see recent activity.';
+            activityDiv.appendChild(p);
+            return;
+        }
+
+        const ul = document.createElement('ul');
+        ul.className = 'divide-y divide-gray-100';
+        items.forEach(item => {
+            const li = document.createElement('li');
+            li.className = 'py-3 flex items-start gap-3';
+            const dot = document.createElement('span');
+            dot.className = 'mt-1.5 h-2 w-2 rounded-full flex-shrink-0 ' + item.icon.replace('text-', 'bg-');
+            const span = document.createElement('span');
+            span.className = 'text-sm text-gray-700';
+            span.textContent = item.text;
+            li.appendChild(dot);
+            li.appendChild(span);
+            ul.appendChild(li);
+        });
+        activityDiv.appendChild(ul);
+    }
+
+    function showMarkPaidModal() {
+        document.getElementById('mark-paid-modal').classList.remove('hidden');
+        const cached = getStoredPassword();
+        if (cached) {
+            document.getElementById('mark-paid-password').value = cached;
+        }
+    }
+
+    function hideMarkPaidModal() {
+        document.getElementById('mark-paid-modal').classList.add('hidden');
+    }
+
+    document.getElementById('mark-paid-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const payload = {
+            master_password: document.getElementById('mark-paid-password').value,
+            amount: parseFloat(document.getElementById('mark-paid-amount').value),
+            hijri_date: document.getElementById('mark-paid-date').value
+        };
+
+        fetch('/api/mark-paid', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                hideMarkPaidModal();
+                showNotification('Zakat payment recorded successfully!', 'success');
+                setTimeout(() => location.reload(), 1500);
+            } else {
+                throw new Error(data.message || 'Failed to record payment');
+            }
+        })
+        .catch(error => {
+            showNotification(error.message, 'error');
+        });
+    });
+</script>
+{% endblock %}
