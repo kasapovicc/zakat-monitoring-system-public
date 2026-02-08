@@ -129,13 +129,13 @@ def _get_icon_path() -> Path | None:
     """
     from app.paths import get_resource_path
 
-    # Try bundled resource location first
-    icon_path = get_resource_path("icon_32x32.png")
+    # Try bundled template icon first (macOS auto-handles dark/light)
+    icon_path = get_resource_path("iconTemplate.png")
     if icon_path.exists():
         return icon_path
 
     # Fallback to development location
-    dev_icon = Path(__file__).parent.parent / "Zekat.iconset" / "icon_32x32.png"
+    dev_icon = Path(__file__).parent.parent / "assets" / "iconTemplate.png"
     if dev_icon.exists():
         return dev_icon
 
@@ -169,6 +169,7 @@ class ZekatMenubarApp(rumps.App):
         super().__init__(
             name="Zekat Monitor",
             icon=str(icon_path) if icon_path else None,
+            template=True,
             quit_button=None,  # We provide our own quit button
         )
 

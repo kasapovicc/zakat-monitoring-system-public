@@ -1,0 +1,451 @@
+/* Comprehensive utility classes for Zekat Monitor */
+
+/* Root variables for consistent theming */
+:root {
+  --app-accent: 16 185 129; /* emerald-500 for Islamic feel */
+  --app-danger: 239 68 68; /* red-500 */
+  --app-warning: 245 158 11; /* amber-500 */
+  --app-info: 59 130 246; /* blue-500 */
+}
+
+/* Body minimum height to push footer down */
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  /* Use --muted as page bg so cards (--card: white) stand out */
+  background-color: hsl(var(--muted)) !important;
+}
+
+/* In dark mode, keep body dark and lift cards to --muted instead */
+.dark body {
+  background-color: hsl(var(--background)) !important;
+}
+
+.dark .uk-card-default,
+.dark .uk-card-primary,
+.dark .uk-card-secondary {
+  background-color: hsl(var(--muted)) !important;
+}
+
+main {
+  flex: 1 0 auto;
+}
+
+/* Container and spacing */
+.max-w-7xl { max-width: 80rem; width: 100%; }
+.max-w-4xl { max-width: 56rem; width: 100%; }
+.mx-auto { margin-left: auto; margin-right: auto; }
+.px-3 { padding-left: 0.75rem; padding-right: 0.75rem; }
+.px-4 { padding-left: 1rem; padding-right: 1rem; }
+.px-5 { padding-left: 1.25rem; padding-right: 1.25rem; }
+.px-6 { padding-left: 1.5rem; padding-right: 1.5rem; }
+.py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+.py-3 { padding-top: 0.75rem; padding-bottom: 0.75rem; }
+.py-4 { padding-top: 1rem; padding-bottom: 1rem; }
+.py-6 { padding-top: 1.5rem; padding-bottom: 1.5rem; }
+.py-8 { padding-top: 2rem; padding-bottom: 2rem; }
+.p-3 { padding: 0.75rem; }
+.p-4 { padding: 1rem; }
+.p-5 { padding: 1.25rem; }
+.p-6 { padding: 1.5rem; }
+.p-8 { padding: 2rem; }
+.pt-3 { padding-top: 0.75rem; }
+.pt-4 { padding-top: 1rem; }
+.pt-6 { padding-top: 1.5rem; }
+.pb-6 { padding-bottom: 1.5rem; }
+.mt-0\.5 { margin-top: 0.125rem; }
+.mt-1 { margin-top: 0.25rem; }
+.mt-1\.5 { margin-top: 0.375rem; }
+.mt-2 { margin-top: 0.5rem; }
+.mt-3 { margin-top: 0.75rem; }
+.mt-4 { margin-top: 1rem; }
+.mt-6 { margin-top: 1.5rem; }
+.mt-auto { margin-top: auto; }
+.mb-1 { margin-bottom: 0.25rem; }
+.mb-2 { margin-bottom: 0.5rem; }
+.mb-3 { margin-bottom: 0.75rem; }
+.mb-4 { margin-bottom: 1rem; }
+.mb-6 { margin-bottom: 1.5rem; }
+.mb-8 { margin-bottom: 2rem; }
+.ml-1 { margin-left: 0.25rem; }
+.ml-2 { margin-left: 0.5rem; }
+.ml-3 { margin-left: 0.75rem; }
+.mr-3 { margin-right: 0.75rem; }
+.mr-auto { margin-right: auto; }
+
+/* Flexbox and grid */
+.flex { display: flex; }
+.flex-col { flex-direction: column; }
+.flex-1 { flex: 1 1 0%; }
+.flex-shrink-0 { flex-shrink: 0; }
+.items-center { align-items: center; }
+.items-start { align-items: flex-start; }
+.justify-center { justify-content: center; }
+.justify-between { justify-content: space-between; }
+.justify-end { justify-content: flex-end; }
+.gap-2 { gap: 0.5rem; }
+.gap-3 { gap: 0.75rem; }
+.space-x-2 > * + * { margin-left: 0.5rem; }
+.space-x-3 > * + * { margin-left: 0.75rem; }
+.space-x-4 > * + * { margin-left: 1rem; }
+.space-y-2 > * + * { margin-top: 0.5rem; }
+.space-y-3 > * + * { margin-top: 0.75rem; }
+.space-y-4 > * + * { margin-top: 1rem; }
+.space-y-6 > * + * { margin-top: 1.5rem; }
+.grid { display: grid; }
+.grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+.grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.gap-4 { gap: 1rem; }
+.gap-6 { gap: 1.5rem; }
+
+/* Grid column span */
+.col-span-2 { grid-column: span 2 / span 2; }
+
+/* Responsive grid */
+@media (min-width: 768px) {
+  .md\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .md\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+/* Typography */
+.text-xs { font-size: 0.75rem; line-height: 1rem; }
+.text-sm { font-size: 0.875rem; line-height: 1.25rem; }
+.text-lg { font-size: 1.125rem; line-height: 1.75rem; }
+.text-xl { font-size: 1.25rem; line-height: 1.75rem; }
+.text-2xl { font-size: 1.5rem; line-height: 2rem; }
+.text-3xl { font-size: 1.875rem; line-height: 2.25rem; }
+.text-5xl { font-size: 3rem; line-height: 1; }
+.font-sans { font-family: 'IBM Plex Sans', system-ui, sans-serif; }
+.font-bold { font-weight: 700; }
+.font-semibold { font-weight: 600; }
+.font-medium { font-weight: 500; }
+.text-center { text-align: center; }
+.text-left { text-align: left; }
+.text-right { text-align: right; }
+.antialiased { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+.whitespace-pre-line { white-space: pre-line; }
+
+/* Display and visibility */
+.hidden { display: none !important; }
+.block { display: block; }
+.inline-block { display: inline-block; }
+.overflow-hidden { overflow: hidden; }
+.overflow-x-auto { overflow-x: auto; }
+
+/* Borders */
+.border { border-width: 1px; }
+.border-t { border-top-width: 1px; }
+.border-t-2 { border-top-width: 2px; }
+.border-2 { border-width: 2px; }
+.rounded { border-radius: 0.25rem; }
+.rounded-md { border-radius: 0.375rem; }
+.rounded-lg { border-radius: 0.5rem; }
+.rounded-full { border-radius: 9999px; }
+.divide-y > * + * { border-top-width: 1px; }
+.divide-border > * + * { border-color: hsl(var(--border)); }
+.divide-divider-dark > * + * { border-color: hsl(var(--border)); }
+.border-divider-dark { border-color: hsl(var(--border)); }
+
+/* Colors - Using CSS variables from Franken UI */
+.bg-background { background-color: hsl(var(--background)); }
+.text-foreground { color: hsl(var(--foreground)); }
+.text-primary { color: hsl(var(--primary)); }
+.text-muted-foreground { color: hsl(var(--muted-foreground)); }
+.bg-primary { background-color: hsl(var(--primary)); }
+.text-primary-foreground { color: hsl(var(--primary-foreground)); }
+.bg-muted { background-color: hsl(var(--muted)); }
+.border-border { border-color: hsl(var(--border)); }
+
+/* Semantic app colors */
+.text-accent { color: rgb(var(--app-accent)); }
+.bg-accent { background-color: rgb(var(--app-accent)); }
+.bg-accent\/10 { background-color: rgb(var(--app-accent) / 0.1); }
+.text-emerald-600 { color: #10b981; }
+.bg-emerald-600 { background-color: #10b981; }
+.bg-emerald-50 { background-color: #ecfdf5; }
+.text-green-600 { color: #16a34a; }
+.bg-green-600 { background-color: #16a34a; }
+.text-blue-500 { color: #3b82f6; }
+.bg-blue-500 { background-color: #3b82f6; }
+.text-amber-500 { color: #f59e0b; }
+.bg-amber-500 { background-color: #f59e0b; }
+.bg-red-50 { background-color: #fef2f2; }
+.bg-red-100 { background-color: #fee2e2; }
+.bg-red-600 { background-color: rgb(var(--app-danger)); }
+.bg-red-700 { background-color: #b91c1c; }
+.text-red-600 { color: rgb(var(--app-danger)); }
+.text-red-700 { color: #b91c1c; }
+.text-red-900 { color: #7f1d1d; }
+.border-red-200 { border-color: #fecaca; }
+.text-gray-400 { color: #9ca3af; }
+.text-gray-500 { color: #6b7280; }
+.text-gray-600 { color: #4b5563; }
+.text-gray-700 { color: #374151; }
+.text-gray-900 { color: #111827; }
+.bg-gray-50 { background-color: #f9fafb; }
+.bg-gray-200 { background-color: #e5e7eb; }
+.border-gray-200 { border-color: #e5e7eb; }
+.border-gray-300 { border-color: #d1d5db; }
+.text-purple-600 { color: #9333ea; }
+.bg-purple-600 { background-color: #9333ea; }
+.bg-purple-600\/10 { background-color: rgb(147 51 234 / 0.1); }
+.bg-white { background-color: #ffffff; }
+
+/* Dark mode color adjustments */
+.dark .bg-red-50 { background-color: rgb(127 29 29 / 0.2); }
+.dark .bg-red-100 { background-color: rgb(127 29 29 / 0.3); }
+.dark .text-red-700 { color: #fca5a5; }
+.dark .text-red-900 { color: #fecaca; }
+.dark .border-red-200 { border-color: rgb(127 29 29 / 0.5); }
+.dark .bg-gray-50 { background-color: rgb(55 65 81 / 0.3); }
+.dark .bg-gray-200 { background-color: rgb(55 65 81 / 0.5); }
+.dark .border-gray-200 { border-color: rgb(209 213 219 / 0.2); }
+.dark .border-gray-300 { border-color: rgb(209 213 219 / 0.3); }
+.dark .text-gray-400 { color: #9ca3af; }
+.dark .text-gray-500 { color: #6b7280; }
+.dark .text-gray-600 { color: #d1d5db; }
+.dark .text-gray-700 { color: #e5e7eb; }
+.dark .text-gray-900 { color: #f9fafb; }
+.dark .bg-white { background-color: hsl(var(--card)); }
+.dark .bg-emerald-50 { background-color: rgb(16 185 129 / 0.1); }
+
+/* Opacity variants */
+.bg-primary\/10 { background-color: hsl(var(--primary) / 0.1); }
+.bg-green-600\/10 { background-color: rgb(22 163 74 / 0.1); }
+.text-primary-foreground\/80 { color: hsl(var(--primary-foreground) / 0.8); }
+.from-primary { --tw-gradient-from: hsl(var(--primary)); }
+.to-primary\/80 { --tw-gradient-to: hsl(var(--primary) / 0.8); }
+.bg-gradient-to-r { background-image: linear-gradient(to right, var(--tw-gradient-from), var(--tw-gradient-to)); }
+
+/* Dark mode utilities */
+.dark .dark\:hidden { display: none !important; }
+.dark .dark\:block { display: block !important; }
+
+/* Responsive utilities */
+@media (min-width: 640px) {
+  .sm\:px-6 { padding-left: 1.5rem; padding-right: 1.5rem; }
+}
+
+@media (min-width: 1024px) {
+  .lg\:px-8 { padding-left: 2rem; padding-right: 2rem; }
+}
+
+/* Size utilities */
+.w-5 { width: 1.25rem; }
+.h-5 { height: 1.25rem; }
+.w-6 { width: 1.5rem; }
+.h-6 { height: 1.5rem; }
+.w-8 { width: 2rem; }
+.h-8 { height: 2rem; }
+.w-10 { width: 2.5rem; }
+.h-10 { height: 2.5rem; }
+.w-12 { width: 3rem; }
+.h-12 { height: 3rem; }
+.h-16 { height: 4rem; }
+.h-64 { height: 16rem; }
+.w-full { width: 100%; }
+
+/* Position */
+.relative { position: relative; }
+.absolute { position: absolute; }
+
+/* Transitions */
+.transition-all { transition-property: all; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); transition-duration: 150ms; }
+.transition-colors { transition-property: color, background-color, border-color; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); transition-duration: 150ms; }
+
+/* SVG icon sizing - constrain but don't hide */
+.uk-icon-button svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* Let inline SVGs size naturally within their containers */
+svg {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+/* Ensure h-8/w-8 SVGs work properly */
+.h-8.w-8 {
+  width: 2rem !important;
+  height: 2rem !important;
+  flex-shrink: 0;
+}
+
+.h-12.w-12 {
+  width: 3rem !important;
+  height: 3rem !important;
+  flex-shrink: 0;
+}
+
+/* Consistent icon sizing for dashboard cards */
+.stat-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  flex-shrink: 0;
+}
+
+/* Activity timeline dots */
+.activity-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 9999px;
+  flex-shrink: 0;
+  margin-top: 0.375rem;
+}
+
+.activity-dot.status-success { background-color: rgb(var(--app-accent)); }
+.activity-dot.status-warning { background-color: rgb(var(--app-warning)); }
+.activity-dot.status-info { background-color: rgb(var(--app-info)); }
+.activity-dot.status-neutral { background-color: hsl(var(--muted-foreground)); }
+
+/* Navbar container fix: UIKit JS adds .uk-navbar (display:flex) to <nav>.
+   The inner max-w-7xl div is a flex child and needs width:100% + horizontal layout. */
+.uk-navbar-container > div {
+  width: 100%;
+  display: flex !important;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Navbar sticky footer styling */
+.app-footer {
+  flex-shrink: 0;
+  margin-top: auto;
+  border-top: 1px solid hsl(var(--border));
+}
+
+/* Danger zone styling */
+.danger-zone {
+  background-color: var(--danger-bg, #fef2f2);
+  border-color: var(--danger-border, #fecaca);
+}
+
+.dark .danger-zone {
+  --danger-bg: rgb(127 29 29 / 0.15);
+  --danger-border: rgb(127 29 29 / 0.5);
+}
+
+.danger-zone-button {
+  background-color: rgb(var(--app-danger));
+  color: white;
+  transition: all 0.2s;
+}
+
+.danger-zone-button:hover {
+  background-color: #dc2626;
+}
+
+.danger-zone-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Source cards styling */
+.source-card {
+  /* No hover effects */
+}
+
+/* Inner cards (nested inside a uk-card) need a distinct background */
+.inner-card {
+  background-color: hsl(var(--muted));
+  border: 1px solid hsl(var(--border));
+}
+
+.dark .inner-card {
+  background-color: hsl(var(--background));
+  border-color: hsl(var(--muted-foreground) / 0.25);
+}
+
+/* Items inside inner-cards need yet another shade */
+.inner-card-item {
+  background-color: hsl(var(--background));
+}
+
+.dark .inner-card-item {
+  background-color: hsl(var(--muted));
+}
+
+/* Settings email source form */
+.email-source-form-card {
+  background-color: hsl(var(--muted));
+  border: 1px solid hsl(var(--border));
+}
+
+.dark .email-source-form-card {
+  background-color: hsl(var(--background));
+  border-color: hsl(var(--muted-foreground) / 0.25);
+}
+
+/* Add email source button */
+.add-source-button {
+  transition: all 0.2s ease;
+  border: 1px dashed hsl(var(--border));
+  background-color: transparent;
+}
+
+.add-source-button:hover {
+  background-color: hsl(var(--muted));
+  border-color: hsl(var(--primary));
+  color: hsl(var(--primary));
+}
+
+/* ===== Global shadow removal =====
+   Franken UI cards use --tw-shadow CSS variables that compose into box-shadow.
+   Reset both the variable and the final property to ensure no shadows leak through. */
+.uk-card,
+.uk-card-default,
+.uk-card-primary,
+.uk-card-secondary,
+.uk-card-small,
+.uk-dropdown,
+.uk-modal-dialog,
+.uk-notification-message {
+  --tw-shadow: 0 0 #0000 !important;
+  --tw-shadow-colored: 0 0 #0000 !important;
+  box-shadow: none !important;
+}
+
+/* Also kill the transition that may flash the shadow on load */
+.uk-card {
+  transition: none !important;
+}
+
+/* ===== Card body padding fix =====
+   Franken UI sets padding-top:0 on uk-card-body when preceded by uk-card-header.
+   Most of our cards have no header, but ensure consistent top padding on all. */
+.uk-card-body {
+  padding: 1.5rem !important;
+}
+
+/* ===== Input border visibility =====
+   Franken UI input borders blend into card backgrounds. Make them more visible. */
+.uk-input,
+.uk-select,
+.uk-textarea {
+  border-color: hsl(var(--foreground) / 0.2) !important;
+}
+
+.dark .uk-input,
+.dark .uk-select,
+.dark .uk-textarea {
+  border-color: hsl(var(--foreground) / 0.25) !important;
+  color-scheme: dark;
+}
+
+/* ===== Dark mode border visibility =====
+   Default border-border is too subtle in dark mode. Lighten dividers globally. */
+.dark .divide-border > * + *,
+.dark .divide-divider-dark > * + *,
+.dark .border-border,
+.dark .border-divider-dark {
+  border-color: hsl(var(--muted-foreground) / 0.3) !important;
+}
+
+/* Also ensure uk-table dividers are visible in dark mode */
+.dark .uk-table-divider > :not(:first-child) > tr,
+.dark .uk-table-divider > tr:not(:first-child) {
+  border-top-color: hsl(var(--border) / 0.6) !important;
+}

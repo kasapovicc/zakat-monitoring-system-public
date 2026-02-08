@@ -3,126 +3,116 @@
 {% block title %}Settings - Zekat Monitor{% endblock %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto space-y-6 fade-in">
     <!-- Page Header -->
-    <div>
-        <h2 class="text-2xl font-bold text-gray-900">Settings</h2>
-        <p class="text-gray-600 mt-1">Manage your zakat monitoring configuration</p>
+    <div class="flex justify-between items-start mb-8">
+        <div>
+            <h2 class="text-2xl font-bold">Settings</h2>
+            <p class="text-muted-foreground mt-1">Manage your zakat monitoring configuration</p>
+        </div>
     </div>
 
-    <!-- Authentication Card -->
-    <div class="bg-white rounded-lg shadow p-6">
-        <h3 class="text-lg font-semibold text-gray-900 mb-4">Authentication</h3>
-        <div class="space-y-4">
-            <div>
-                <label for="master_password" class="block text-sm font-medium text-gray-700">
-                    Master Password <span class="text-red-500">*</span>
-                </label>
-                <input type="password" id="master_password" required
-                       class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2">
-                <p class="mt-1 text-sm text-gray-500">Required to load and save settings</p>
+    <!-- Email Sources & Accounts Card -->
+    <div id="email-sources-card" class="uk-card uk-card-default mb-8">
+        <div class="uk-card-body">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold">Email Sources & Accounts</h3>
             </div>
-            <div>
-                <button type="button" onclick="loadSettings()"
-                        class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium transition-colors">
-                    Load Settings
+
+            <!-- Email Sources Container -->
+            <div id="email-sources-container" class="space-y-4">
+                <!-- Email source cards will be dynamically inserted here -->
+            </div>
+
+            <!-- Add Email Source Form (initially hidden) -->
+            <div id="add-email-source-form" class="hidden mt-6 pt-6 border-t border-border">
+                <h4 class="text-sm font-semibold mb-4">Add New Email Source</h4>
+                <div class="space-y-4 email-source-form-card p-4 rounded-lg">
+                    <div>
+                        <label for="new_label" class="block text-sm font-medium">Label (optional)</label>
+                        <input type="text" id="new_label"
+                               placeholder="e.g. Personal, Company, Savings"
+                               class="uk-input mt-1">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label for="new_email" class="block text-sm font-medium">Email Address</label>
+                            <input type="email" id="new_email" required
+                                   class="uk-input mt-1">
+                        </div>
+                        <div>
+                            <label for="new_password" class="block text-sm font-medium">Email Password</label>
+                            <input type="password" id="new_password" required
+                                   class="uk-input mt-1">
+                        </div>
+                        <div>
+                            <label for="new_imap_server" class="block text-sm font-medium">IMAP Server</label>
+                            <input type="text" id="new_imap_server" value="imap.gmail.com" required
+                                   class="uk-input mt-1">
+                        </div>
+                        <div>
+                            <label for="new_imap_port" class="block text-sm font-medium">IMAP Port</label>
+                            <input type="number" id="new_imap_port" value="993" required
+                                   class="uk-input mt-1">
+                        </div>
+                    </div>
+
+                    <!-- Account Pairs -->
+                    <div class="border-t border-border pt-4">
+                        <h5 class="text-sm font-medium mb-3">Account Pairs (BAM/EUR)</h5>
+                        <div id="account-pairs-container" class="space-y-3">
+                            <div class="account-pair bg-muted p-4 rounded-lg border border-border">
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-xs font-medium">BAM Account</label>
+                                        <input type="text" class="bam-account uk-input mt-1" required>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-medium">EUR Account</label>
+                                        <input type="text" class="eur-account uk-input mt-1" required>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="button" onclick="addAccountPair()"
+                                class="mt-3 text-sm text-blue-600 hover:text-blue-700 font-medium">
+                            + Add Account Pair
+                        </button>
+                    </div>
+
+                    <!-- Form Actions -->
+                    <div class="flex justify-end space-x-3 pt-4 border-t border-border">
+                        <button type="button" onclick="cancelAddEmailSource()"
+                                class="px-3 py-2 text-sm bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 font-medium">
+                            Cancel
+                        </button>
+                        <button type="button" onclick="saveNewEmailSource()"
+                                class="px-3 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium">
+                            Save Email Source
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Add Email Source Button -->
+            <div id="add-email-source-btn" class="mt-6 pt-6 border-t border-border">
+                <button type="button" onclick="showAddEmailSourceForm()"
+                        class="add-source-button px-4 py-3 rounded-lg font-medium text-sm">
+                    <span class="flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                        </svg>
+                        <span>Add Email Source</span>
+                    </span>
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- Email Sources & Accounts Card -->
-    <div id="email-sources-card" class="bg-white rounded-lg shadow p-6 hidden">
-        <div class="flex items-center justify-between mb-4">
-            <h3 class="text-lg font-semibold text-gray-900">Email Sources & Accounts</h3>
-        </div>
-
-        <!-- Email Sources Container -->
-        <div id="email-sources-container" class="space-y-4">
-            <!-- Email source cards will be dynamically inserted here -->
-        </div>
-
-        <!-- Add Email Source Form (initially hidden) -->
-        <div id="add-email-source-form" class="hidden mt-6 pt-6 border-t border-gray-200">
-            <h4 class="text-sm font-semibold text-gray-900 mb-4">Add New Email Source</h4>
-            <div class="space-y-4 bg-gray-50 p-4 rounded-md">
-                <div>
-                    <label for="new_label" class="block text-sm font-medium text-gray-700">Label (optional)</label>
-                    <input type="text" id="new_label"
-                           placeholder="e.g. Personal, Company, Savings"
-                           class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2 text-sm">
-                </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label for="new_email" class="block text-sm font-medium text-gray-700">Email Address</label>
-                        <input type="email" id="new_email" required
-                               class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2 text-sm">
-                    </div>
-                    <div>
-                        <label for="new_password" class="block text-sm font-medium text-gray-700">Email Password</label>
-                        <input type="password" id="new_password" required
-                               class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2 text-sm">
-                    </div>
-                    <div>
-                        <label for="new_imap_server" class="block text-sm font-medium text-gray-700">IMAP Server</label>
-                        <input type="text" id="new_imap_server" value="imap.gmail.com" required
-                               class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2 text-sm">
-                    </div>
-                    <div>
-                        <label for="new_imap_port" class="block text-sm font-medium text-gray-700">IMAP Port</label>
-                        <input type="number" id="new_imap_port" value="993" required
-                               class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2 text-sm">
-                    </div>
-                </div>
-
-                <!-- Account Pairs -->
-                <div class="border-t border-gray-300 pt-4">
-                    <h5 class="text-sm font-medium text-gray-900 mb-3">Account Pairs (BAM/EUR)</h5>
-                    <div id="account-pairs-container" class="space-y-3">
-                        <div class="account-pair bg-white p-3 rounded border border-gray-200">
-                            <div class="grid grid-cols-2 gap-3">
-                                <div>
-                                    <label class="block text-xs font-medium text-gray-700">BAM Account</label>
-                                    <input type="text" class="bam-account mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2 text-sm" required>
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-medium text-gray-700">EUR Account</label>
-                                    <input type="text" class="eur-account mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2 text-sm" required>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <button type="button" onclick="addAccountPair()"
-                            class="mt-3 text-sm text-blue-600 hover:text-blue-700 font-medium">
-                        + Add Account Pair
-                    </button>
-                </div>
-
-                <!-- Form Actions -->
-                <div class="flex justify-end space-x-3 pt-4 border-t border-gray-300">
-                    <button type="button" onclick="cancelAddEmailSource()"
-                            class="px-3 py-2 text-sm bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 font-medium">
-                        Cancel
-                    </button>
-                    <button type="button" onclick="saveNewEmailSource()"
-                            class="px-3 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium">
-                        Save Email Source
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Add Email Source Button -->
-        <button type="button" id="add-email-source-btn" onclick="showAddEmailSourceForm()"
-                class="mt-6 pt-6 border-t border-gray-200 w-full text-center px-4 py-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-md font-medium text-sm transition-colors">
-            + Add Email Source
-        </button>
-    </div>
-
     <!-- Report Delivery Card -->
-    <div id="report-delivery-card" class="bg-white rounded-lg shadow p-6 hidden">
+    <div id="report-delivery-card" class="uk-card uk-card-default mb-8">
+        <div class="uk-card-body">
         <div class="flex items-center justify-between mb-4">
-            <h3 class="text-lg font-semibold text-gray-900">Report Delivery</h3>
+            <h3 class="text-lg font-semibold">Report Delivery</h3>
             <button type="button" onclick="toggleReportDeliveryEdit()"
                     class="text-sm text-blue-600 hover:text-blue-700 font-medium">
                 Edit
@@ -156,36 +146,36 @@
         </div>
 
         <!-- Edit Mode -->
-        <div id="report-delivery-edit" class="hidden space-y-4 bg-gray-50 p-4 rounded-md">
+        <div id="report-delivery-edit" class="hidden space-y-4 email-source-form-card p-4 rounded-lg">
             <div class="grid grid-cols-2 gap-4">
                 <div>
-                    <label for="edit_smtp_server" class="block text-sm font-medium text-gray-700">SMTP Server</label>
+                    <label for="edit_smtp_server" class="block text-sm font-medium">SMTP Server</label>
                     <input type="text" id="edit_smtp_server"
-                           class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2 text-sm">
+                           class="uk-input mt-1">
                 </div>
                 <div>
-                    <label for="edit_smtp_port" class="block text-sm font-medium text-gray-700">SMTP Port</label>
+                    <label for="edit_smtp_port" class="block text-sm font-medium">SMTP Port</label>
                     <input type="number" id="edit_smtp_port"
-                           class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2 text-sm">
+                           class="uk-input mt-1">
                 </div>
                 <div>
-                    <label for="edit_smtp_username" class="block text-sm font-medium text-gray-700">Username</label>
+                    <label for="edit_smtp_username" class="block text-sm font-medium">Username</label>
                     <input type="text" id="edit_smtp_username"
-                           class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2 text-sm">
+                           class="uk-input mt-1">
                 </div>
                 <div>
-                    <label for="edit_sender_email" class="block text-sm font-medium text-gray-700">Sender Email</label>
+                    <label for="edit_sender_email" class="block text-sm font-medium">Sender Email</label>
                     <input type="email" id="edit_sender_email"
-                           class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2 text-sm">
+                           class="uk-input mt-1">
                 </div>
                 <div class="col-span-2">
-                    <label for="edit_recipient_email" class="block text-sm font-medium text-gray-700">Recipient Email</label>
+                    <label for="edit_recipient_email" class="block text-sm font-medium">Recipient Email</label>
                     <input type="email" id="edit_recipient_email"
-                           class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2 text-sm">
+                           class="uk-input mt-1">
                 </div>
             </div>
 
-            <div class="flex justify-end space-x-3 pt-4 border-t border-gray-300">
+            <div class="flex justify-end space-x-3 pt-4 border-t border-border">
                 <button type="button" onclick="toggleReportDeliveryEdit()"
                         class="px-3 py-2 text-sm bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 font-medium">
                     Cancel
@@ -196,12 +186,14 @@
                 </button>
             </div>
         </div>
+        </div>
     </div>
 
     <!-- Year Progress Override Card -->
-    <div id="year-progress-card" class="bg-white rounded-lg shadow p-6 hidden">
+    <div id="year-progress-card" class="uk-card uk-card-default mb-8">
+        <div class="uk-card-body">
         <div class="flex items-center justify-between mb-4">
-            <h3 class="text-lg font-semibold text-gray-900">Year Progress Override</h3>
+            <h3 class="text-lg font-semibold">Year Progress Override</h3>
             <button type="button" onclick="toggleYearProgressEdit()"
                     class="text-sm text-blue-600 hover:text-blue-700 font-medium">
                 Edit
@@ -227,7 +219,7 @@
         </div>
 
         <!-- Edit Mode -->
-        <div id="year-progress-edit" class="hidden space-y-4 bg-gray-50 p-4 rounded-md">
+        <div id="year-progress-edit" class="hidden space-y-4 email-source-form-card p-4 rounded-lg">
             <div>
                 <label class="flex items-center space-x-2">
                     <input type="checkbox" id="year_progress_enabled"
@@ -237,18 +229,18 @@
             </div>
             <div class="grid grid-cols-2 gap-4">
                 <div>
-                    <label for="year_progress_months" class="block text-sm font-medium text-gray-700">Months (0-11)</label>
+                    <label for="year_progress_months" class="block text-sm font-medium">Months (0-11)</label>
                     <input type="number" id="year_progress_months" min="0" max="11"
-                           class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2 text-sm">
+                           class="uk-input mt-1">
                 </div>
                 <div>
-                    <label for="year_progress_hijri_date" class="block text-sm font-medium text-gray-700">Hijri Date (DD/MM/YYYY)</label>
+                    <label for="year_progress_hijri_date" class="block text-sm font-medium">Hijri Date (DD/MM/YYYY)</label>
                     <input type="text" id="year_progress_hijri_date" placeholder="01/01/1446"
-                           class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2 text-sm">
+                           class="uk-input mt-1">
                 </div>
             </div>
 
-            <div class="flex justify-end space-x-3 pt-4 border-t border-gray-300">
+            <div class="flex justify-end space-x-3 pt-4 border-t border-border">
                 <button type="button" onclick="toggleYearProgressEdit()"
                         class="px-3 py-2 text-sm bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 font-medium">
                     Cancel
@@ -259,12 +251,14 @@
                 </button>
             </div>
         </div>
+        </div>
     </div>
 
     <!-- Additional Settings Card -->
-    <div id="additional-settings-card" class="bg-white rounded-lg shadow p-6 hidden">
+    <div id="additional-settings-card" class="uk-card uk-card-default mb-8">
+        <div class="uk-card-body">
         <div class="flex items-center justify-between mb-4">
-            <h3 class="text-lg font-semibold text-gray-900">Additional Settings</h3>
+            <h3 class="text-lg font-semibold">Additional Settings</h3>
             <button type="button" onclick="toggleAdditionalSettingsEdit()"
                     class="text-sm text-blue-600 hover:text-blue-700 font-medium">
                 Edit
@@ -286,21 +280,21 @@
         </div>
 
         <!-- Edit Mode -->
-        <div id="additional-settings-edit" class="hidden space-y-4 bg-gray-50 p-4 rounded-md">
+        <div id="additional-settings-edit" class="hidden space-y-4 email-source-form-card p-4 rounded-lg">
             <div class="grid grid-cols-2 gap-4">
                 <div>
-                    <label for="edit_additional_assets" class="block text-sm font-medium text-gray-700">Additional Assets (BAM)</label>
+                    <label for="edit_additional_assets" class="block text-sm font-medium">Additional Assets (BAM)</label>
                     <input type="number" id="edit_additional_assets" min="0" step="0.01"
-                           class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2 text-sm">
+                           class="uk-input mt-1">
                 </div>
                 <div>
-                    <label for="edit_nisab_fallback" class="block text-sm font-medium text-gray-700">Nisab Fallback (BAM)</label>
+                    <label for="edit_nisab_fallback" class="block text-sm font-medium">Nisab Fallback (BAM)</label>
                     <input type="number" id="edit_nisab_fallback" min="1" step="0.01"
-                           class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2 text-sm">
+                           class="uk-input mt-1">
                 </div>
             </div>
 
-            <div class="flex justify-end space-x-3 pt-4 border-t border-gray-300">
+            <div class="flex justify-end space-x-3 pt-4 border-t border-border">
                 <button type="button" onclick="toggleAdditionalSettingsEdit()"
                         class="px-3 py-2 text-sm bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 font-medium">
                     Cancel
@@ -311,42 +305,68 @@
                 </button>
             </div>
         </div>
+        </div>
+    </div>
+
+    <!-- Configuration Management Card -->
+    <div class="uk-card uk-card-default mb-8">
+        <div class="uk-card-body">
+            <h3 class="text-lg font-semibold mb-4">Configuration Management</h3>
+            <button type="button" onclick="restartSetupWizard()"
+                    class="uk-button uk-button-default flex items-center gap-2">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                <span>Restart Setup Wizard</span>
+            </button>
+            <p class="text-xs text-muted-foreground mt-2">
+                Re-run the initial configuration wizard to modify all settings
+            </p>
+        </div>
     </div>
 
     <!-- Danger Zone Card -->
-    <div class="bg-red-50 border border-red-200 rounded-lg shadow p-6">
-        <h3 class="text-lg font-semibold text-red-900 mb-2">Danger Zone</h3>
+    <div class="uk-card uk-card-default danger-zone border-2">
+        <div class="uk-card-body">
+        <div class="flex items-center gap-3 mb-2">
+            <svg class="w-6 h-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            <h3 class="text-lg font-semibold text-red-900">Danger Zone</h3>
+        </div>
         <p class="text-sm text-red-700 mb-6">
-            These actions cannot be undone. Please be certain before proceeding.
+            This action cannot be undone. Please be certain before proceeding.
         </p>
 
         <div class="space-y-4">
-            <!-- Restart Setup Wizard Button -->
-            <button type="button" onclick="restartSetupWizard()"
-                    class="w-full px-4 py-2 text-left text-red-700 bg-white border border-red-200 rounded-md hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500 font-medium transition-colors">
-                Restart Setup Wizard
-            </button>
-
             <!-- Delete All Configuration -->
-            <div class="border border-red-200 rounded-md p-4 bg-white">
-                <p class="text-sm font-medium text-red-900 mb-3">Delete All Configuration</p>
-                <p class="text-xs text-red-700 mb-3">
+            <div class="border-2 border-red-200 rounded-lg p-4 bg-white">
+                <div class="flex items-center gap-2 mb-3">
+                    <svg class="w-5 h-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                    <p class="text-sm font-medium text-red-900">Delete All Configuration</p>
+                </div>
+                <p class="text-xs text-red-700 mb-4">
                     This will permanently delete all your configuration data. Type "DELETE" below to confirm.
                 </p>
                 <div class="space-y-3">
                     <input type="text" id="delete-confirm-input" placeholder="Type DELETE to confirm"
-                           class="block w-full rounded-md border border-red-200 shadow-sm focus:border-red-500 focus:ring-red-500 px-3 py-2 text-sm">
+                           class="uk-input border-red-200 focus:border-red-500">
                     <button type="button" onclick="deleteAllConfiguration()"
-                            class="w-full px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            class="danger-zone-button w-full px-4 py-3 rounded-lg font-medium flex items-center justify-center gap-2"
                             id="delete-all-btn"
                             disabled>
-                        Delete All Configuration
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                        <span>Delete All Configuration</span>
                     </button>
                 </div>
             </div>
         </div>
+        </div>
     </div>
-</div>
 
 {% endblock %}
 
@@ -360,10 +380,29 @@
     window.addEventListener('DOMContentLoaded', function() {
         const cached = getStoredPassword();
         if (cached) {
-            document.getElementById('master_password').value = cached;
-            loadSettings();
+            storedPassword = cached;
+            loadSettingsSilently(cached);
         }
     });
+
+    function loadSettingsSilently(password) {
+        const params = new URLSearchParams({ master_password: password });
+
+        fetch(`/api/settings/full?${params}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    currentSettings = data.data;
+                    populateSettingsUI();
+                } else {
+                    throw new Error(data.message || 'Failed to load settings');
+                }
+            })
+            .catch(error => {
+                clearStoredPassword();
+                console.error('Failed to auto-load settings:', error);
+            });
+    }
 
     // Utility function to mask sensitive data
     function maskEmail(email) {
@@ -384,44 +423,10 @@
         return String(value);
     }
 
-    // Load settings from API
-    function loadSettings() {
-        const password = document.getElementById('master_password').value;
-        if (!password) {
-            showNotification('Please enter your master password', 'error');
-            return;
-        }
-
-        const params = new URLSearchParams({ master_password: password });
-
-        fetch(`/api/settings/full?${params}`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    storedPassword = password;
-                    storePassword(password);
-                    currentSettings = data.data;
-                    populateSettingsUI();
-                    showNotification('Settings loaded successfully', 'success');
-                } else {
-                    throw new Error(data.message || 'Failed to load settings');
-                }
-            })
-            .catch(error => {
-                clearStoredPassword();
-                showNotification(error.message, 'error');
-            });
-    }
 
     // Populate UI with loaded settings
     function populateSettingsUI() {
         if (!currentSettings) return;
-
-        // Show all cards
-        document.getElementById('email-sources-card').classList.remove('hidden');
-        document.getElementById('report-delivery-card').classList.remove('hidden');
-        document.getElementById('year-progress-card').classList.remove('hidden');
-        document.getElementById('additional-settings-card').classList.remove('hidden');
 
         // Populate email sources
         populateEmailSources();
@@ -445,7 +450,10 @@
 
         emailSources.forEach((source, index) => {
             const sourceCard = document.createElement('div');
-            sourceCard.className = 'border border-gray-200 rounded-lg p-4 bg-gray-50';
+            sourceCard.className = 'inner-card rounded-lg';
+
+            const cardBody = document.createElement('div');
+            cardBody.className = 'p-4';
 
             const headerDiv = document.createElement('div');
             headerDiv.className = 'flex items-start justify-between mb-3';
@@ -453,57 +461,76 @@
             const infoDiv = document.createElement('div');
             infoDiv.className = 'flex-1';
 
-            const labelP = document.createElement('p');
-            labelP.className = 'text-sm font-semibold text-gray-900';
+            const labelContainer = document.createElement('div');
+            labelContainer.className = 'flex items-center gap-2 mb-1';
+
+            const labelIcon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            labelIcon.setAttribute('class', 'w-4 h-4 text-accent');
+            labelIcon.setAttribute('fill', 'none');
+            labelIcon.setAttribute('viewBox', '0 0 24 24');
+            labelIcon.setAttribute('stroke', 'currentColor');
+            labelIcon.setAttribute('stroke-width', '2');
+            const labelIconPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            labelIconPath.setAttribute('stroke-linecap', 'round');
+            labelIconPath.setAttribute('stroke-linejoin', 'round');
+            labelIconPath.setAttribute('d', 'M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207');
+            labelIcon.appendChild(labelIconPath);
+
+            const labelP = document.createElement('span');
+            labelP.className = 'text-sm font-semibold';
             labelP.textContent = source.label || `Source ${index + 1}`;
 
+            labelContainer.appendChild(labelIcon);
+            labelContainer.appendChild(labelP);
+
             const emailP = document.createElement('p');
-            emailP.className = 'text-xs text-gray-600 mt-0.5';
+            emailP.className = 'text-xs text-muted-foreground';
             emailP.textContent = maskEmail(source.email);
 
             const serverP = document.createElement('p');
-            serverP.className = 'text-xs text-gray-500 mt-1';
+            serverP.className = 'text-xs text-muted-foreground mt-1';
             serverP.textContent = source.imap_server + ':' + source.imap_port;
 
-            infoDiv.appendChild(labelP);
+            infoDiv.appendChild(labelContainer);
             infoDiv.appendChild(emailP);
             infoDiv.appendChild(serverP);
 
             const deleteBtn = document.createElement('button');
             deleteBtn.type = 'button';
-            deleteBtn.className = 'ml-2 px-3 py-1 text-sm bg-red-600 text-white rounded-md hover:bg-red-700 font-medium transition-colors' +
-                (emailSources.length === 1 ? ' opacity-50 cursor-not-allowed' : '');
+            deleteBtn.className = 'uk-button uk-button-small uk-button-danger' +
+                (emailSources.length === 1 ? ' uk-disabled' : '');
             deleteBtn.textContent = 'Delete';
             deleteBtn.disabled = emailSources.length === 1;
             deleteBtn.onclick = () => deleteEmailSource(index);
 
             headerDiv.appendChild(infoDiv);
             headerDiv.appendChild(deleteBtn);
+            cardBody.appendChild(headerDiv);
 
             const accountsDiv = document.createElement('div');
-            accountsDiv.className = 'bg-white rounded p-3';
+            accountsDiv.className = 'border-t border-border pt-4 mt-3 px-1';
 
             const accountsLabelP = document.createElement('p');
-            accountsLabelP.className = 'text-xs font-medium text-gray-600 uppercase mb-2';
+            accountsLabelP.className = 'text-xs font-medium text-muted-foreground uppercase mb-2';
             accountsLabelP.textContent = 'Account Pairs';
 
             const accountsListDiv = document.createElement('div');
-            accountsListDiv.className = 'space-y-2';
+            accountsListDiv.className = 'space-y-3';
 
             const pairs = source.account_pairs || [];
             pairs.forEach((account, pairIndex) => {
                 const accountItemDiv = document.createElement('div');
-                accountItemDiv.className = 'flex items-center justify-between text-sm';
+                accountItemDiv.className = 'flex items-center justify-between text-sm inner-card-item p-3 rounded';
 
                 const labelsDiv = document.createElement('div');
-                labelsDiv.className = 'flex space-x-4';
+                labelsDiv.className = 'flex flex-col gap-1';
 
                 const bamSpan = document.createElement('span');
-                bamSpan.className = 'text-gray-600';
+                bamSpan.className = 'text-xs';
                 bamSpan.textContent = 'BAM: ' + maskAccountNumber(account.bam_account);
 
                 const eurSpan = document.createElement('span');
-                eurSpan.className = 'text-gray-600';
+                eurSpan.className = 'text-xs text-muted-foreground';
                 eurSpan.textContent = 'EUR: ' + maskAccountNumber(account.eur_account);
 
                 labelsDiv.appendChild(bamSpan);
@@ -513,7 +540,7 @@
                 if (pairs.length > 1) {
                     const delPairBtn = document.createElement('button');
                     delPairBtn.type = 'button';
-                    delPairBtn.className = 'text-xs text-red-600 hover:text-red-800 font-medium';
+                    delPairBtn.className = 'uk-button uk-button-small uk-button-danger';
                     delPairBtn.textContent = 'Remove';
                     delPairBtn.onclick = () => deleteAccountPair(source.id, pairIndex);
                     accountItemDiv.appendChild(delPairBtn);
@@ -524,9 +551,9 @@
 
             accountsDiv.appendChild(accountsLabelP);
             accountsDiv.appendChild(accountsListDiv);
+            cardBody.appendChild(accountsDiv);
 
-            sourceCard.appendChild(headerDiv);
-            sourceCard.appendChild(accountsDiv);
+            sourceCard.appendChild(cardBody);
             container.appendChild(sourceCard);
         });
 
@@ -555,40 +582,47 @@
         document.getElementById('new_imap_port').value = '993';
         document.getElementById('account-pairs-container').textContent = '';
 
+        document.getElementById('account-pairs-container').appendChild(createAccountPairElement());
+    }
+
+    function createAccountPairElement() {
         const pair = document.createElement('div');
-        pair.className = 'account-pair bg-white p-3 rounded border border-gray-200';
-        pair.innerHTML = `
-            <div class="grid grid-cols-2 gap-3">
-                <div>
-                    <label class="block text-xs font-medium text-gray-700">BAM Account</label>
-                    <input type="text" class="bam-account mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2 text-sm" required>
-                </div>
-                <div>
-                    <label class="block text-xs font-medium text-gray-700">EUR Account</label>
-                    <input type="text" class="eur-account mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2 text-sm" required>
-                </div>
-            </div>
-        `;
-        document.getElementById('account-pairs-container').appendChild(pair);
+        pair.className = 'account-pair bg-muted p-4 rounded-lg border border-border';
+
+        const grid = document.createElement('div');
+        grid.className = 'grid grid-cols-2 gap-3';
+
+        const bamDiv = document.createElement('div');
+        const bamLabel = document.createElement('label');
+        bamLabel.className = 'block text-xs font-medium';
+        bamLabel.textContent = 'BAM Account';
+        const bamInput = document.createElement('input');
+        bamInput.type = 'text';
+        bamInput.className = 'bam-account uk-input mt-1';
+        bamInput.required = true;
+        bamDiv.appendChild(bamLabel);
+        bamDiv.appendChild(bamInput);
+
+        const eurDiv = document.createElement('div');
+        const eurLabel = document.createElement('label');
+        eurLabel.className = 'block text-xs font-medium';
+        eurLabel.textContent = 'EUR Account';
+        const eurInput = document.createElement('input');
+        eurInput.type = 'text';
+        eurInput.className = 'eur-account uk-input mt-1';
+        eurInput.required = true;
+        eurDiv.appendChild(eurLabel);
+        eurDiv.appendChild(eurInput);
+
+        grid.appendChild(bamDiv);
+        grid.appendChild(eurDiv);
+        pair.appendChild(grid);
+        return pair;
     }
 
     function addAccountPair() {
         const container = document.getElementById('account-pairs-container');
-        const pair = document.createElement('div');
-        pair.className = 'account-pair bg-white p-3 rounded border border-gray-200';
-        pair.innerHTML = `
-            <div class="grid grid-cols-2 gap-3">
-                <div>
-                    <label class="block text-xs font-medium text-gray-700">BAM Account</label>
-                    <input type="text" class="bam-account mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2 text-sm" required>
-                </div>
-                <div>
-                    <label class="block text-xs font-medium text-gray-700">EUR Account</label>
-                    <input type="text" class="eur-account mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2 text-sm" required>
-                </div>
-            </div>
-        `;
-        container.appendChild(pair);
+        container.appendChild(createAccountPairElement());
     }
 
     function saveNewEmailSource() {

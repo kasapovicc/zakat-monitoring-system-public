@@ -8,6 +8,7 @@ Runs PyInstaller and produces dist/Zekat.app
 import sys
 import subprocess
 import shutil
+import time
 from pathlib import Path
 
 
@@ -30,13 +31,17 @@ def main():
     build_dir = Path("build")
     dist_dir = Path("dist")
 
-    if build_dir.exists():
-        shutil.rmtree(build_dir)
-        print("   ✓ Removed build/")
-
-    if dist_dir.exists():
-        shutil.rmtree(dist_dir)
-        print("   ✓ Removed dist/")
+    for d in (build_dir, dist_dir):
+        if d.exists():
+            for attempt in range(3):
+                try:
+                    shutil.rmtree(d)
+                    break
+                except OSError:
+                    time.sleep(0.5)
+            else:
+                shutil.rmtree(d)  # final attempt — let it raise
+            print(f"   ✓ Removed {d}/")
 
     # Run PyInstaller
     print("\n2. Running PyInstaller...")

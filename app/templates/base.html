@@ -5,85 +5,72 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Zekat Monitor{% endblock %}</title>
 
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Dark mode init (before any rendering) -->
+    <script>
+        if (localStorage.getItem('color-theme') === 'dark' ||
+            (!('color-theme' in localStorage) &&
+             window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        }
+    </script>
 
-    <!-- HTMX -->
-    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <!-- Fonts (local) -->
+    <link rel="stylesheet" href="/static/fonts.css">
+
+    <!-- Franken UI v1.0.0 (zinc theme) -->
+    <link rel="stylesheet" href="/static/franken-ui.min.css">
+
+    <!-- Utility classes (local) -->
+    <link rel="stylesheet" href="/static/utilities.css">
+
+    <!-- UIkit JS -->
+    <script src="/static/uikit.min.js"></script>
+    <script src="/static/uikit-icons.min.js"></script>
 
     <!-- Chart.js for visualizations -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-
-    <style>
-        /* Custom scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #f1f1f1;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #888;
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #555;
-        }
-
-        /* Animations */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .fade-in {
-            animation: fadeIn 0.3s ease-out;
-        }
-
-        /* Loading spinner */
-        .spinner {
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #3b82f6;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-    </style>
+    <script src="/static/chart.min.js"></script>
 
     {% block extra_head %}{% endblock %}
 </head>
-<body class="bg-gray-50 min-h-screen">
+<body class="bg-background font-sans text-foreground antialiased">
     <!-- Navigation -->
-    <nav class="bg-white shadow-sm border-b border-gray-200">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16">
-                <div class="flex items-center">
-                    <h1 class="text-2xl font-bold text-blue-600">
-                        <span class="text-green-600">Zekat</span> Monitor
-                    </h1>
-                </div>
+    <nav class="uk-navbar-container" data-uk-navbar>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
+            <div class="uk-navbar-left">
+                <a href="/" class="uk-navbar-item uk-logo flex items-center gap-2">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="text-accent">
+                        <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="currentColor" opacity="0.7"/>
+                        <path d="M2 17L12 22L22 17V12L12 17L2 12V17Z" fill="currentColor"/>
+                        <path d="M12 12V17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                    <span class="text-accent font-bold text-xl">Zekat</span>
+                    <span class="font-bold text-xl">Monitor</span>
+                </a>
+            </div>
 
+            <div class="uk-navbar-right flex items-center">
                 {% if configured %}
-                <div class="flex items-center space-x-4">
-                    <a href="/" class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">
-                        Dashboard
-                    </a>
-                    <a href="/history" class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">
-                        History
-                    </a>
-                    <a href="/analysis" class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">
-                        Analysis
-                    </a>
-                    <a href="/settings" class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">
-                        Settings
-                    </a>
-                </div>
+                <ul class="uk-navbar-nav">
+                    <li><a href="/">Dashboard</a></li>
+                    <li><a href="/history">History</a></li>
+                    <li><a href="/analysis">Analysis</a></li>
+                    <li><a href="/settings">Settings</a></li>
+                </ul>
                 {% endif %}
+                <div class="uk-navbar-item">
+                    <button class="uk-icon-button" id="theme-toggle" aria-label="Toggle dark mode">
+                        <svg id="theme-icon-light" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="dark:hidden" style="color: hsl(var(--foreground));">
+                            <circle cx="12" cy="12" r="4"></circle>
+                            <path d="M12 2v2"></path><path d="M12 20v2"></path>
+                            <path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path>
+                            <path d="M2 12h2"></path><path d="M20 12h2"></path>
+                            <path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path>
+                        </svg>
+                        <svg id="theme-icon-dark" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="hidden dark:block" style="color: hsl(var(--foreground));">
+                            <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
+                        </svg>
+                    </button>
+                </div>
             </div>
         </div>
     </nav>
@@ -94,64 +81,24 @@
     </main>
 
     <!-- Footer -->
-    <footer class="bg-white border-t border-gray-200 mt-auto">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-            <p class="text-center text-sm text-gray-500">
-                Zekat Monitor v0.1.0 - Automated Zakat Calculation System
+    <footer class="app-footer">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+            <p class="text-center text-xs text-muted-foreground">
+                Zekat Monitor v1.2.0 — Automated Zakat Calculation System
             </p>
         </div>
     </footer>
 
-    <!-- Notification Toast (hidden by default) -->
-    <div id="notification" class="hidden fixed bottom-4 right-4 bg-white rounded-lg shadow-lg border border-gray-200 p-4 max-w-sm fade-in">
-        <div class="flex items-start">
-            <div class="flex-shrink-0">
-                <svg class="h-6 w-6 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-            </div>
-            <div class="ml-3 flex-1">
-                <p class="text-sm font-medium text-gray-900" id="notification-message">
-                    Success message here
-                </p>
-            </div>
-            <button onclick="hideNotification()" class="ml-4 flex-shrink-0 text-gray-400 hover:text-gray-500">
-                <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
-                </svg>
-            </button>
-        </div>
-    </div>
-
     <script>
-        // Notification helpers
-        function showNotification(message, type = 'success') {
-            const notification = document.getElementById('notification');
-            const messageEl = document.getElementById('notification-message');
-            const icon = notification.querySelector('svg');
-
-            messageEl.textContent = message;
-
-            // Update icon color based on type
-            if (type === 'error') {
-                icon.classList.remove('text-green-400');
-                icon.classList.add('text-red-400');
-            } else {
-                icon.classList.remove('text-red-400');
-                icon.classList.add('text-green-400');
-            }
-
-            notification.classList.remove('hidden');
-
-            // Auto-hide after 5 seconds
-            setTimeout(() => {
-                hideNotification();
-            }, 5000);
-        }
-
-        function hideNotification() {
-            const notification = document.getElementById('notification');
-            notification.classList.add('hidden');
+        // Notification helper using UIkit
+        function showNotification(message, type) {
+            var status = (type === 'error') ? 'danger' : 'success';
+            UIkit.notification({
+                message: message,
+                status: status,
+                pos: 'bottom-right',
+                timeout: 5000
+            });
         }
 
         // Password session management (5-minute TTL)
@@ -183,7 +130,6 @@
         // HTMX event listeners for notifications
         document.body.addEventListener('htmx:afterRequest', function(event) {
             if (event.detail.successful) {
-                // Handle successful requests
                 const response = event.detail.xhr.response;
                 try {
                     const data = JSON.parse(response);
@@ -194,8 +140,18 @@
                     // Response is not JSON, ignore
                 }
             } else {
-                // Handle errors
                 showNotification('An error occurred. Please try again.', 'error');
+            }
+        });
+
+        // Dark mode toggle
+        document.getElementById('theme-toggle').addEventListener('click', function() {
+            if (document.documentElement.classList.contains('dark')) {
+                document.documentElement.classList.remove('dark');
+                localStorage.setItem('color-theme', 'light');
+            } else {
+                document.documentElement.classList.add('dark');
+                localStorage.setItem('color-theme', 'dark');
             }
         });
     </script>

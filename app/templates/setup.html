@@ -10,141 +10,63 @@
     .step.active {
         display: block;
     }
-    .step-indicator {
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 2rem;
-    }
-    .step-number {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        flex: 1;
-    }
-    .step-number.active .circle {
-        background-color: #3b82f6;
-        color: white;
-    }
-    .step-number.completed .circle {
-        background-color: #10b981;
-        color: white;
-    }
-    .circle {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: bold;
-        background-color: #e5e7eb;
-        margin-bottom: 0.5rem;
-        transition: all 0.3s ease;
-    }
-    .step-label {
-        font-size: 0.875rem;
-        color: #6b7280;
-        text-align: center;
-    }
-    .step-number.active .step-label,
-    .step-number.completed .step-label {
-        color: #1f2937;
-        font-weight: 500;
-    }
-    .step-connector {
-        flex: 1;
-        margin-top: 20px;
-        height: 2px;
-        background-color: #e5e7eb;
-        transition: background-color 0.3s ease;
-    }
-    .step-connector.active {
-        background-color: #3b82f6;
-    }
-    .step-connector.completed {
-        background-color: #10b981;
-    }
-    .password-strength {
-        height: 4px;
-        border-radius: 2px;
-        margin-top: 0.5rem;
-        transition: background-color 0.3s ease;
-    }
-    .source-card {
-        border: 1px solid #e5e7eb;
-        border-radius: 0.5rem;
-        padding: 1rem;
-        margin-bottom: 1rem;
-        background-color: #f9fafb;
-    }
-    .account-pair {
-        border-left: 3px solid #e5e7eb;
-        padding-left: 1rem;
-        margin-left: 1rem;
-        margin-bottom: 0.75rem;
-        padding-bottom: 0.75rem;
-    }
-    .masked-text {
-        font-family: monospace;
-        color: #6b7280;
-    }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="max-w-2xl mx-auto">
+<div>
     <!-- Step Indicator -->
-    <div class="step-indicator">
-        <div class="step-number active" id="step-1-indicator">
-            <div class="circle">1</div>
-            <div class="step-label">Master Password</div>
+    <div class="flex justify-between mb-8">
+        <div class="flex flex-col items-center flex-1" id="step-1-indicator">
+            <div class="circle w-10 h-10 rounded-full flex items-center justify-center font-bold bg-primary text-primary-foreground mb-2 transition-all">1</div>
+            <div class="step-label text-sm text-muted-foreground text-center">Master Password</div>
         </div>
-        <div class="step-connector" id="connector-1"></div>
-        <div class="step-number" id="step-2-indicator">
-            <div class="circle">2</div>
-            <div class="step-label">Email & Accounts</div>
+        <div class="flex-1 mt-5 h-0.5 bg-muted transition-colors" id="connector-1"></div>
+        <div class="flex flex-col items-center flex-1" id="step-2-indicator">
+            <div class="circle w-10 h-10 rounded-full flex items-center justify-center font-bold bg-muted text-muted-foreground mb-2 transition-all">2</div>
+            <div class="step-label text-sm text-muted-foreground text-center">Email & Accounts</div>
         </div>
-        <div class="step-connector" id="connector-2"></div>
-        <div class="step-number" id="step-3-indicator">
-            <div class="circle">3</div>
-            <div class="step-label">Report Delivery</div>
+        <div class="flex-1 mt-5 h-0.5 bg-muted transition-colors" id="connector-2"></div>
+        <div class="flex flex-col items-center flex-1" id="step-3-indicator">
+            <div class="circle w-10 h-10 rounded-full flex items-center justify-center font-bold bg-muted text-muted-foreground mb-2 transition-all">3</div>
+            <div class="step-label text-sm text-muted-foreground text-center">Report Delivery</div>
         </div>
-        <div class="step-connector" id="connector-3"></div>
-        <div class="step-number" id="step-4-indicator">
-            <div class="circle">4</div>
-            <div class="step-label">Settings</div>
+        <div class="flex-1 mt-5 h-0.5 bg-muted transition-colors" id="connector-3"></div>
+        <div class="flex flex-col items-center flex-1" id="step-4-indicator">
+            <div class="circle w-10 h-10 rounded-full flex items-center justify-center font-bold bg-muted text-muted-foreground mb-2 transition-all">4</div>
+            <div class="step-label text-sm text-muted-foreground text-center">Settings</div>
         </div>
-        <div class="step-connector" id="connector-4"></div>
-        <div class="step-number" id="step-5-indicator">
-            <div class="circle">5</div>
-            <div class="step-label">Review</div>
+        <div class="flex-1 mt-5 h-0.5 bg-muted transition-colors" id="connector-4"></div>
+        <div class="flex flex-col items-center flex-1" id="step-5-indicator">
+            <div class="circle w-10 h-10 rounded-full flex items-center justify-center font-bold bg-muted text-muted-foreground mb-2 transition-all">5</div>
+            <div class="step-label text-sm text-muted-foreground text-center">Review</div>
         </div>
     </div>
 
     {% if restart_mode %}
     <!-- Restart Setup Modal -->
-    <div id="restart-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div class="bg-white rounded-lg shadow-xl p-8 max-w-md w-full mx-4">
-            <h2 class="text-2xl font-bold text-gray-900 mb-4">Unlock Configuration</h2>
-            <p class="text-gray-600 mb-6">Enter your master password to modify the configuration.</p>
+    <div id="restart-modal" data-uk-modal>
+        <div class="uk-modal-dialog uk-modal-body">
+            <h2 class="uk-modal-title">Unlock Configuration</h2>
+            <p class="text-muted-foreground mb-6">Enter your master password to modify the configuration.</p>
             <div class="mb-6">
-                <label for="restart-password" class="block text-sm font-medium text-gray-700 mb-2">
+                <label for="restart-password" class="block text-sm font-medium mb-2">
                     Master Password
                 </label>
                 <input
                     type="password"
                     id="restart-password"
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    class="uk-input"
                     placeholder="Enter your password"
                 />
             </div>
             <button
                 onclick="unlockConfiguration()"
-                class="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                class="uk-button uk-button-primary w-full"
             >
                 Unlock Setup
             </button>
-            <p id="restart-error" class="text-red-600 text-sm mt-4 hidden"></p>
+            <p id="restart-error" class="text-destructive text-sm mt-4 hidden"></p>
         </div>
     </div>
     {% endif %}
@@ -156,264 +78,272 @@
 
         <!-- Step 1: Master Password -->
         <div class="step active" id="step-1">
-            <div class="bg-white rounded-lg shadow-md p-8">
-                <h2 class="text-2xl font-bold text-gray-900 mb-6">Create Master Password</h2>
-                <p class="text-gray-600 mb-6">
-                    This password will encrypt your sensitive configuration data. Use a strong password with at least 8 characters.
-                </p>
+            <div class="uk-card uk-card-default">
+                <div class="uk-card-body">
+                    <h2 class="text-2xl font-bold mb-6">Create Master Password</h2>
+                    <p class="text-muted-foreground mb-6">
+                        This password will encrypt your sensitive configuration data. Use a strong password with at least 8 characters.
+                    </p>
 
-                <div class="mb-6">
-                    <label for="master-password" class="block text-sm font-medium text-gray-700 mb-2">
-                        Master Password
-                    </label>
-                    <input
-                        type="password"
-                        id="master-password"
-                        name="master_password"
-                        minlength="8"
-                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="Minimum 8 characters"
-                        oninput="updatePasswordStrength()"
-                    />
-                    <div class="password-strength bg-gray-300" id="password-strength"></div>
-                    <p class="text-sm text-gray-500 mt-2" id="password-strength-text">Strength: weak</p>
-                </div>
+                    <div class="mb-6">
+                        <label for="master-password" class="block text-sm font-medium mb-2">
+                            Master Password
+                        </label>
+                        <input
+                            type="password"
+                            id="master-password"
+                            name="master_password"
+                            minlength="8"
+                            class="uk-input"
+                            placeholder="Minimum 8 characters"
+                            oninput="updatePasswordStrength()"
+                        />
+                        <div class="h-1 bg-muted rounded mt-2" id="password-strength"></div>
+                        <p class="text-sm text-muted-foreground mt-2" id="password-strength-text">Strength: weak</p>
+                    </div>
 
-                <div class="mb-8">
-                    <label for="master-password-confirm" class="block text-sm font-medium text-gray-700 mb-2">
-                        Confirm Password
-                    </label>
-                    <input
-                        type="password"
-                        id="master-password-confirm"
-                        minlength="8"
-                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="Re-enter your password"
-                        oninput="validatePasswordMatch()"
-                    />
-                    <p class="text-sm text-red-600 mt-2 hidden" id="password-mismatch-error">Passwords do not match</p>
+                    <div class="mb-8">
+                        <label for="master-password-confirm" class="block text-sm font-medium mb-2">
+                            Confirm Password
+                        </label>
+                        <input
+                            type="password"
+                            id="master-password-confirm"
+                            minlength="8"
+                            class="uk-input"
+                            placeholder="Re-enter your password"
+                            oninput="validatePasswordMatch()"
+                        />
+                        <p class="text-sm text-destructive mt-2 hidden" id="password-mismatch-error">Passwords do not match</p>
+                    </div>
                 </div>
             </div>
         </div>
 
         <!-- Step 2: Email Sources & Accounts -->
         <div class="step" id="step-2">
-            <div class="bg-white rounded-lg shadow-md p-8">
-                <h2 class="text-2xl font-bold text-gray-900 mb-6">Email Sources & Account Numbers</h2>
-                <p class="text-gray-600 mb-6">
-                    Configure one or more email sources. Each source can have multiple account pairs (BAM and EUR accounts).
-                </p>
+            <div class="uk-card uk-card-default">
+                <div class="uk-card-body">
+                    <h2 class="text-2xl font-bold mb-6">Email Sources & Account Numbers</h2>
+                    <p class="text-muted-foreground mb-6">
+                        Configure one or more email sources. Each source can have multiple account pairs (BAM and EUR accounts).
+                    </p>
 
-                <div id="email-sources-container">
-                    <!-- Email sources will be dynamically inserted here -->
+                    <div id="email-sources-container">
+                        <!-- Email sources will be dynamically inserted here -->
+                    </div>
+
+                    <button
+                        type="button"
+                        onclick="addEmailSource()"
+                        class="mt-6 uk-button uk-button-default uk-button-large w-full border-2 border-dashed"
+                    >
+                        + Add Another Email Source
+                    </button>
                 </div>
-
-                <button
-                    type="button"
-                    onclick="addEmailSource()"
-                    class="mt-6 w-full bg-green-50 border-2 border-dashed border-green-300 text-green-700 py-2 px-4 rounded-lg hover:bg-green-100 transition-colors font-medium"
-                >
-                    + Add Another Email Source
-                </button>
             </div>
         </div>
 
         <!-- Step 3: Report Delivery (SMTP) -->
         <div class="step" id="step-3">
-            <div class="bg-white rounded-lg shadow-md p-8">
-                <h2 class="text-2xl font-bold text-gray-900 mb-6">Report Delivery (SMTP)</h2>
-                <p class="text-gray-600 mb-6">
-                    Configure where and how the monthly zakat report should be sent.
-                </p>
+            <div class="uk-card uk-card-default">
+                <div class="uk-card-body">
+                    <h2 class="text-2xl font-bold mb-6">Report Delivery (SMTP)</h2>
+                    <p class="text-muted-foreground mb-6">
+                        Configure where and how the monthly zakat report should be sent.
+                    </p>
 
-                <div class="grid grid-cols-2 gap-6 mb-6">
-                    <div>
-                        <label for="smtp-server" class="block text-sm font-medium text-gray-700 mb-2">
-                            SMTP Server
+                    <div class="grid grid-cols-2 gap-6 mb-6">
+                        <div>
+                            <label for="smtp-server" class="block text-sm font-medium mb-2">
+                                SMTP Server
+                            </label>
+                            <input
+                                type="text"
+                                id="smtp-server"
+                                name="smtp_server"
+                                value="smtp.gmail.com"
+                                class="uk-input"
+                            />
+                        </div>
+                        <div>
+                            <label for="smtp-port" class="block text-sm font-medium mb-2">
+                                SMTP Port
+                            </label>
+                            <input
+                                type="number"
+                                id="smtp-port"
+                                name="smtp_port"
+                                value="587"
+                                class="uk-input"
+                            />
+                        </div>
+                    </div>
+
+                    <div class="mb-6">
+                        <label for="smtp-username" class="block text-sm font-medium mb-2">
+                            SMTP Username (Email)
                         </label>
                         <input
-                            type="text"
-                            id="smtp-server"
-                            name="smtp_server"
-                            value="smtp.gmail.com"
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            type="email"
+                            id="smtp-username"
+                            name="smtp_username"
+                            class="uk-input"
+                            placeholder="your-email@gmail.com"
+                            required
                         />
                     </div>
-                    <div>
-                        <label for="smtp-port" class="block text-sm font-medium text-gray-700 mb-2">
-                            SMTP Port
+
+                    <div class="mb-6">
+                        <label for="smtp-password" class="block text-sm font-medium mb-2">
+                            SMTP Password
                         </label>
                         <input
-                            type="number"
-                            id="smtp-port"
-                            name="smtp_port"
-                            value="587"
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            type="password"
+                            id="smtp-password"
+                            name="smtp_password"
+                            class="uk-input"
+                            placeholder="App password or account password"
+                            required
                         />
                     </div>
-                </div>
 
-                <div class="mb-6">
-                    <label for="smtp-username" class="block text-sm font-medium text-gray-700 mb-2">
-                        SMTP Username (Email)
-                    </label>
-                    <input
-                        type="email"
-                        id="smtp-username"
-                        name="smtp_username"
-                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="your-email@gmail.com"
-                        required
-                    />
-                </div>
+                    <div class="mb-6">
+                        <label for="sender-email" class="block text-sm font-medium mb-2">
+                            Sender Email (From Address)
+                        </label>
+                        <input
+                            type="email"
+                            id="sender-email"
+                            name="sender_email"
+                            class="uk-input"
+                            placeholder="sender@example.com"
+                            required
+                        />
+                    </div>
 
-                <div class="mb-6">
-                    <label for="smtp-password" class="block text-sm font-medium text-gray-700 mb-2">
-                        SMTP Password
-                    </label>
-                    <input
-                        type="password"
-                        id="smtp-password"
-                        name="smtp_password"
-                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="App password or account password"
-                        required
-                    />
-                </div>
-
-                <div class="mb-6">
-                    <label for="sender-email" class="block text-sm font-medium text-gray-700 mb-2">
-                        Sender Email (From Address)
-                    </label>
-                    <input
-                        type="email"
-                        id="sender-email"
-                        name="sender_email"
-                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="sender@example.com"
-                        required
-                    />
-                </div>
-
-                <div class="mb-6">
-                    <label for="recipient-email" class="block text-sm font-medium text-gray-700 mb-2">
-                        Recipient Email (To Address)
-                    </label>
-                    <input
-                        type="email"
-                        id="recipient-email"
-                        name="recipient_email"
-                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="recipient@example.com"
-                        required
-                    />
+                    <div class="mb-6">
+                        <label for="recipient-email" class="block text-sm font-medium mb-2">
+                            Recipient Email (To Address)
+                        </label>
+                        <input
+                            type="email"
+                            id="recipient-email"
+                            name="recipient_email"
+                            class="uk-input"
+                            placeholder="recipient@example.com"
+                            required
+                        />
+                    </div>
                 </div>
             </div>
         </div>
 
         <!-- Step 4: Additional Settings -->
         <div class="step" id="step-4">
-            <div class="bg-white rounded-lg shadow-md p-8">
-                <h2 class="text-2xl font-bold text-gray-900 mb-6">Additional Settings</h2>
+            <div class="uk-card uk-card-default">
+                <div class="uk-card-body">
+                    <h2 class="text-2xl font-bold mb-6">Additional Settings</h2>
 
-                <div class="mb-6">
-                    <label for="additional-assets" class="block text-sm font-medium text-gray-700 mb-2">
-                        Additional Assets (BAM)
-                    </label>
-                    <input
-                        type="number"
-                        id="additional-assets"
-                        name="additional_assets"
-                        value="0"
-                        step="0.01"
-                        min="0"
-                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="0.00"
-                    />
-                    <p class="text-sm text-gray-500 mt-2">
-                        Include other assets (jewelry, cash, etc.) that should count toward nisab.
-                    </p>
-                </div>
-
-                <div class="mb-8">
-                    <label for="nisab-fallback" class="block text-sm font-medium text-gray-700 mb-2">
-                        Nisab Fallback (BAM)
-                    </label>
-                    <input
-                        type="number"
-                        id="nisab-fallback"
-                        name="nisab_fallback_bam"
-                        value="24624"
-                        step="0.01"
-                        min="0"
-                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="24624.00"
-                    />
-                    <p class="text-sm text-gray-500 mt-2">
-                        Used if live nisab value cannot be fetched. Current default is 24,624 BAM.
-                    </p>
-                </div>
-
-                <!-- Migration Section -->
-                <div class="border-t border-gray-200 pt-8">
-                    <label class="flex items-center">
+                    <div class="mb-6">
+                        <label for="additional-assets" class="block text-sm font-medium mb-2">
+                            Additional Assets (BAM)
+                        </label>
                         <input
-                            type="checkbox"
-                            id="migration-checkbox"
-                            onchange="toggleMigrationSettings()"
-                            class="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                            type="number"
+                            id="additional-assets"
+                            name="additional_assets"
+                            value="0"
+                            step="0.01"
+                            min="0"
+                            class="uk-input"
+                            placeholder="0.00"
                         />
-                        <span class="ml-3 text-sm font-medium text-gray-700">
-                            I'm migrating from another system
-                        </span>
-                    </label>
-                    <p class="text-sm text-gray-500 mt-2">
-                        If enabled, you can set the current year progress and hijri date to account for months already tracked elsewhere.
-                    </p>
+                        <p class="text-sm text-muted-foreground mt-2">
+                            Include other assets (jewelry, cash, etc.) that should count toward nisab.
+                        </p>
+                    </div>
 
-                    <div id="migration-settings" class="hidden mt-6 p-6 bg-blue-50 border border-blue-200 rounded-lg">
-                        <div class="mb-6">
-                            <label for="months-above-nisab" class="block text-sm font-medium text-gray-700 mb-2">
-                                Months Above Nisab (0-11)
-                            </label>
-                            <div class="flex items-center gap-4">
-                                <input
-                                    type="range"
-                                    id="months-above-nisab"
-                                    name="months_above_nisab"
-                                    min="0"
-                                    max="11"
-                                    value="0"
-                                    class="flex-1"
-                                    oninput="updateMonthsDisplay()"
-                                />
-                                <input
-                                    type="number"
-                                    id="months-above-nisab-display"
-                                    min="0"
-                                    max="11"
-                                    value="0"
-                                    class="w-16 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-center"
-                                    oninput="updateMonthsSlider()"
-                                />
-                                <span class="text-sm text-gray-600">months</span>
-                            </div>
-                        </div>
+                    <div class="mb-8">
+                        <label for="nisab-fallback" class="block text-sm font-medium mb-2">
+                            Nisab Fallback (BAM)
+                        </label>
+                        <input
+                            type="number"
+                            id="nisab-fallback"
+                            name="nisab_fallback_bam"
+                            value="24624"
+                            step="0.01"
+                            min="0"
+                            class="uk-input"
+                            placeholder="24624.00"
+                        />
+                        <p class="text-sm text-muted-foreground mt-2">
+                            Used if live nisab value cannot be fetched. Current default is 24,624 BAM.
+                        </p>
+                    </div>
 
-                        <div>
-                            <label for="hijri-date" class="block text-sm font-medium text-gray-700 mb-2">
-                                As of Hijri Date (DD/MM/YYYY)
-                            </label>
+                    <!-- Migration Section -->
+                    <div class="border-t border-border pt-8">
+                        <label class="flex items-center">
                             <input
-                                type="text"
-                                id="hijri-date"
-                                name="hijri_date"
-                                placeholder="DD/MM/YYYY (e.g., 15/06/1446)"
-                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                type="checkbox"
+                                id="migration-checkbox"
+                                onchange="toggleMigrationSettings()"
+                                class="uk-checkbox"
                             />
-                            <p class="text-sm text-gray-500 mt-2">
-                                The Hijri date as of which the months above nisab count applies.
-                            </p>
+                            <span class="ml-3 text-sm font-medium">
+                                I'm migrating from another system
+                            </span>
+                        </label>
+                        <p class="text-sm text-muted-foreground mt-2">
+                            If enabled, you can set the current year progress and hijri date to account for months already tracked elsewhere.
+                        </p>
+
+                        <div id="migration-settings" class="hidden mt-6 p-6 bg-primary/10 border border-primary/20 rounded-lg">
+                            <div class="mb-6">
+                                <label for="months-above-nisab" class="block text-sm font-medium mb-2">
+                                    Months Above Nisab (0-11)
+                                </label>
+                                <div class="flex items-center gap-4">
+                                    <input
+                                        type="range"
+                                        id="months-above-nisab"
+                                        name="months_above_nisab"
+                                        min="0"
+                                        max="11"
+                                        value="0"
+                                        class="uk-range flex-1"
+                                        oninput="updateMonthsDisplay()"
+                                    />
+                                    <input
+                                        type="number"
+                                        id="months-above-nisab-display"
+                                        min="0"
+                                        max="11"
+                                        value="0"
+                                        class="uk-input w-16 text-center"
+                                        oninput="updateMonthsSlider()"
+                                    />
+                                    <span class="text-sm text-muted-foreground">months</span>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label for="hijri-date" class="block text-sm font-medium mb-2">
+                                    As of Hijri Date (DD/MM/YYYY)
+                                </label>
+                                <input
+                                    type="text"
+                                    id="hijri-date"
+                                    name="hijri_date"
+                                    placeholder="DD/MM/YYYY (e.g., 15/06/1446)"
+                                    class="uk-input"
+                                />
+                                <p class="text-sm text-muted-foreground mt-2">
+                                    The Hijri date as of which the months above nisab count applies.
+                                </p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -422,20 +352,22 @@
 
         <!-- Step 5: Review & Submit -->
         <div class="step" id="step-5">
-            <div class="bg-white rounded-lg shadow-md p-8">
-                <h2 class="text-2xl font-bold text-gray-900 mb-6">Review Configuration</h2>
-                <p class="text-gray-600 mb-8">
-                    Please review your configuration before submitting. All sensitive data is masked.
-                </p>
-
-                <div id="review-content">
-                    <!-- Review content will be dynamically inserted here -->
-                </div>
-
-                <div class="mt-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                    <p class="text-sm text-blue-800">
-                        Once submitted, your configuration will be encrypted and stored securely. You can modify settings later if needed.
+            <div class="uk-card uk-card-default">
+                <div class="uk-card-body">
+                    <h2 class="text-2xl font-bold mb-6">Review Configuration</h2>
+                    <p class="text-muted-foreground mb-8">
+                        Please review your configuration before submitting. All sensitive data is masked.
                     </p>
+
+                    <div id="review-content">
+                        <!-- Review content will be dynamically inserted here -->
+                    </div>
+
+                    <div class="uk-alert uk-alert-primary mt-8">
+                        <p class="text-sm">
+                            Once submitted, your configuration will be encrypted and stored securely. You can modify settings later if needed.
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -446,7 +378,7 @@
                 type="button"
                 id="prev-button"
                 onclick="previousStep()"
-                class="hidden bg-gray-200 text-gray-800 py-2 px-6 rounded-lg hover:bg-gray-300 transition-colors font-medium"
+                class="hidden uk-button uk-button-default"
             >
                 Back
             </button>
@@ -455,7 +387,7 @@
                 type="button"
                 id="next-button"
                 onclick="nextStep()"
-                class="bg-blue-600 text-white py-2 px-6 rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                class="uk-button uk-button-primary"
             >
                 Next
             </button>
@@ -463,7 +395,7 @@
                 type="button"
                 id="submit-button"
                 onclick="submitForm()"
-                class="hidden bg-green-600 text-white py-2 px-6 rounded-lg hover:bg-green-700 transition-colors font-medium"
+                class="hidden uk-button uk-button-secondary"
             >
                 Submit Setup
             </button>
@@ -483,6 +415,12 @@
     document.addEventListener('DOMContentLoaded', function() {
         generateEncryptionKey();
         addEmailSource(); // Add first email source
+
+        // Show restart modal if present
+        const restartModal = document.getElementById('restart-modal');
+        if (restartModal) {
+            UIkit.modal('#restart-modal').show();
+        }
     });
 
     // ==================== Encryption Key ====================
@@ -498,29 +436,40 @@
         // Hide all steps
         for (let i = 1; i <= totalSteps; i++) {
             document.getElementById(`step-${i}`).classList.remove('active');
-            document.getElementById(`step-${i}-indicator`).classList.remove('active');
+
+            const indicator = document.getElementById(`step-${i}-indicator`);
+            const circle = indicator.querySelector('.circle');
+
             if (i < stepNumber) {
-                document.getElementById(`step-${i}-indicator`).classList.add('completed');
+                // Completed step
+                circle.classList.remove('bg-primary', 'text-primary-foreground', 'bg-muted', 'text-muted-foreground');
+                circle.classList.add('bg-green-600', 'text-white');
+            } else if (i === stepNumber) {
+                // Active step
+                circle.classList.remove('bg-green-600', 'text-white', 'bg-muted', 'text-muted-foreground');
+                circle.classList.add('bg-primary', 'text-primary-foreground');
             } else {
-                document.getElementById(`step-${i}-indicator`).classList.remove('completed');
+                // Inactive step
+                circle.classList.remove('bg-primary', 'text-primary-foreground', 'bg-green-600', 'text-white');
+                circle.classList.add('bg-muted', 'text-muted-foreground');
             }
         }
 
         // Show current step
         document.getElementById(`step-${stepNumber}`).classList.add('active');
-        document.getElementById(`step-${stepNumber}-indicator`).classList.add('active');
-        document.getElementById(`step-${stepNumber}-indicator`).classList.remove('completed');
 
         // Update connectors
         for (let i = 1; i < totalSteps; i++) {
             const connector = document.getElementById(`connector-${i}`);
             if (i < stepNumber) {
-                connector.classList.add('completed');
-                connector.classList.remove('active');
+                connector.classList.remove('bg-muted', 'bg-primary');
+                connector.classList.add('bg-green-600');
             } else if (i === stepNumber - 1) {
-                connector.classList.add('active');
+                connector.classList.remove('bg-muted', 'bg-green-600');
+                connector.classList.add('bg-primary');
             } else {
-                connector.classList.remove('active', 'completed');
+                connector.classList.remove('bg-primary', 'bg-green-600');
+                connector.classList.add('bg-muted');
             }
         }
 
@@ -698,14 +647,17 @@
         const sourceIndex = sourceCount;
 
         const sourceCard = document.createElement('div');
-        sourceCard.className = 'source-card';
+        sourceCard.className = 'uk-card uk-card-default mb-4';
         sourceCard.id = `source-${sourceIndex}`;
+
+        const cardBody = document.createElement('div');
+        cardBody.className = 'uk-card-body';
 
         const header = document.createElement('div');
         header.className = 'flex justify-between items-center mb-4';
 
         const title = document.createElement('h3');
-        title.className = 'text-lg font-semibold text-gray-900';
+        title.className = 'text-lg font-semibold';
         title.textContent = `Email Source ${sourceIndex + 1}`;
 
         const removeBtn = document.createElement('button');
@@ -721,12 +673,12 @@
         const labelDiv = document.createElement('div');
         labelDiv.className = 'mb-4';
         const labelLabel = document.createElement('label');
-        labelLabel.className = 'block text-sm font-medium text-gray-700 mb-2';
+        labelLabel.className = 'block text-sm font-medium mb-2';
         labelLabel.textContent = 'Label (optional)';
         const labelInput = document.createElement('input');
         labelInput.type = 'text';
         labelInput.name = 'source_label';
-        labelInput.className = 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm';
+        labelInput.className = 'uk-input';
         labelInput.placeholder = 'e.g. Personal, Company, Savings';
         labelDiv.appendChild(labelLabel);
         labelDiv.appendChild(labelInput);
@@ -736,12 +688,12 @@
 
         const emailDiv = document.createElement('div');
         const emailLabel = document.createElement('label');
-        emailLabel.className = 'block text-sm font-medium text-gray-700 mb-2';
+        emailLabel.className = 'block text-sm font-medium mb-2';
         emailLabel.textContent = 'Email Address';
         const emailInput = document.createElement('input');
         emailInput.type = 'email';
         emailInput.name = 'email';
-        emailInput.className = 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm';
+        emailInput.className = 'uk-input';
         emailInput.placeholder = 'your-email@gmail.com';
         emailInput.required = true;
         emailDiv.appendChild(emailLabel);
@@ -749,12 +701,12 @@
 
         const passwordDiv = document.createElement('div');
         const passwordLabel = document.createElement('label');
-        passwordLabel.className = 'block text-sm font-medium text-gray-700 mb-2';
+        passwordLabel.className = 'block text-sm font-medium mb-2';
         passwordLabel.textContent = 'App Password';
         const passwordInput = document.createElement('input');
         passwordInput.type = 'password';
         passwordInput.name = 'imap_password';
-        passwordInput.className = 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm';
+        passwordInput.className = 'uk-input';
         passwordInput.placeholder = 'Gmail app password';
         passwordInput.required = true;
         passwordDiv.appendChild(passwordLabel);
@@ -768,25 +720,25 @@
 
         const serverDiv = document.createElement('div');
         const serverLabel = document.createElement('label');
-        serverLabel.className = 'block text-sm font-medium text-gray-700 mb-2';
+        serverLabel.className = 'block text-sm font-medium mb-2';
         serverLabel.textContent = 'IMAP Server';
         const serverInput = document.createElement('input');
         serverInput.type = 'text';
         serverInput.name = 'imap_server';
         serverInput.value = 'imap.gmail.com';
-        serverInput.className = 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm';
+        serverInput.className = 'uk-input';
         serverDiv.appendChild(serverLabel);
         serverDiv.appendChild(serverInput);
 
         const portDiv = document.createElement('div');
         const portLabel = document.createElement('label');
-        portLabel.className = 'block text-sm font-medium text-gray-700 mb-2';
+        portLabel.className = 'block text-sm font-medium mb-2';
         portLabel.textContent = 'IMAP Port';
         const portInput = document.createElement('input');
         portInput.type = 'number';
         portInput.name = 'imap_port';
         portInput.value = '993';
-        portInput.className = 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm';
+        portInput.className = 'uk-input';
         portDiv.appendChild(portLabel);
         portDiv.appendChild(portInput);
 
@@ -794,10 +746,10 @@
         grid2.appendChild(portDiv);
 
         const pairSection = document.createElement('div');
-        pairSection.className = 'mt-6 pt-4 border-t border-gray-200';
+        pairSection.className = 'mt-6 pt-4 border-t border-border';
 
         const pairTitle = document.createElement('h4');
-        pairTitle.className = 'font-semibold text-gray-900 mb-3';
+        pairTitle.className = 'font-semibold mb-3';
         pairTitle.textContent = 'Account Pairs';
 
         const pairsContainer = document.createElement('div');
@@ -806,7 +758,7 @@
 
         const addPairBtn = document.createElement('button');
         addPairBtn.type = 'button';
-        addPairBtn.className = 'mt-3 text-blue-600 hover:text-blue-800 font-medium text-sm';
+        addPairBtn.className = 'uk-button uk-button-default uk-button-small mt-3';
         addPairBtn.textContent = '+ Add Another Account Pair';
         addPairBtn.onclick = function() { addAccountPair(sourceIndex); };
 
@@ -814,12 +766,13 @@
         pairSection.appendChild(pairsContainer);
         pairSection.appendChild(addPairBtn);
 
-        sourceCard.appendChild(header);
-        sourceCard.appendChild(labelDiv);
-        sourceCard.appendChild(grid1);
-        sourceCard.appendChild(grid2);
-        sourceCard.appendChild(pairSection);
+        cardBody.appendChild(header);
+        cardBody.appendChild(labelDiv);
+        cardBody.appendChild(grid1);
+        cardBody.appendChild(grid2);
+        cardBody.appendChild(pairSection);
 
+        sourceCard.appendChild(cardBody);
         container.appendChild(sourceCard);
         addAccountPair(sourceIndex); // Add first account pair
     }
@@ -838,7 +791,7 @@
         const pairIndex = pairCount;
 
         const pair = document.createElement('div');
-        pair.className = 'account-pair';
+        pair.className = 'border-l-4 border-border pl-4 ml-4 mb-3 pb-3';
         pair.id = `pair-${sourceIndex}-${pairIndex}`;
 
         const grid = document.createElement('div');
@@ -846,12 +799,12 @@
 
         const bamDiv = document.createElement('div');
         const bamLabel = document.createElement('label');
-        bamLabel.className = 'block text-xs font-medium text-gray-700 mb-1';
+        bamLabel.className = 'block text-xs font-medium mb-1';
         bamLabel.textContent = 'BAM Account';
         const bamInput = document.createElement('input');
         bamInput.type = 'text';
         bamInput.name = 'bam_account';
-        bamInput.className = 'w-full px-3 py-2 border border-gray-300 rounded text-sm';
+        bamInput.className = 'uk-input';
         bamInput.placeholder = '123456789';
         bamInput.required = true;
         bamDiv.appendChild(bamLabel);
@@ -859,12 +812,12 @@
 
         const eurDiv = document.createElement('div');
         const eurLabel = document.createElement('label');
-        eurLabel.className = 'block text-xs font-medium text-gray-700 mb-1';
+        eurLabel.className = 'block text-xs font-medium mb-1';
         eurLabel.textContent = 'EUR Account';
         const eurInput = document.createElement('input');
         eurInput.type = 'text';
         eurInput.name = 'eur_account';
-        eurInput.className = 'w-full px-3 py-2 border border-gray-300 rounded text-sm';
+        eurInput.className = 'uk-input';
         eurInput.placeholder = '987654321';
         eurInput.required = true;
         eurDiv.appendChild(eurLabel);
@@ -875,7 +828,7 @@
 
         const removeBtn = document.createElement('button');
         removeBtn.type = 'button';
-        removeBtn.className = `text-red-500 hover:text-red-700 text-xs font-medium ${pairCount <= 1 ? 'opacity-50 cursor-not-allowed' : ''}`;
+        removeBtn.className = `uk-button uk-button-danger uk-button-small ${pairCount <= 1 ? 'opacity-50 cursor-not-allowed' : ''}`;
         removeBtn.textContent = 'Remove Pair';
         removeBtn.onclick = function() { removeAccountPair(sourceIndex, pairIndex); };
         if (pairCount <= 1) removeBtn.disabled = true;
@@ -1238,10 +1191,7 @@
         })
         .then(data => {
             // Hide modal
-            const modal = document.getElementById('restart-modal');
-            if (modal) {
-                modal.style.display = 'none';
-            }
+            UIkit.modal('#restart-modal').hide();
 
             // Store the password for later use and pre-fill form
             restartMasterPassword = password;

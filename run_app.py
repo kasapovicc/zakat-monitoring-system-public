@@ -8,6 +8,8 @@ Starts FastAPI server without menubar for rapid iteration and testing.
 import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from pathlib import Path
 
 from app.api.routes import router as api_router
 from app.api.views import router as views_router
@@ -16,7 +18,7 @@ from app.api.views import router as views_router
 app = FastAPI(
     title="Zekat Monitor",
     description="Zakat monitoring and calculation API",
-    version="0.1.0"
+    version="1.2.0"
 )
 
 # Add CORS middleware for development
@@ -27,6 +29,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Mount static files
+static_dir = Path(__file__).parent / "app" / "static"
+app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
 
 # Include HTML template routes (no prefix for root paths)
 app.include_router(views_router)

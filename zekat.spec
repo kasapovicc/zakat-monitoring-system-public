@@ -33,8 +33,9 @@ datas = [
     (str(project_root / 'app' / 'static'), 'app/static'),
     # CRITICAL: run_app.py must be at root for imports to work
     (str(project_root / 'run_app.py'), '.'),
-    # Menubar icon
-    (str(project_root / 'Zekat.iconset' / 'icon_32x32.png'), '.'),
+    # Menubar icon (template for macOS dark/light auto-handling)
+    (str(project_root / 'assets' / 'iconTemplate.png'), '.'),
+    (str(project_root / 'assets' / 'iconTemplate@2x.png'), '.'),
     # Window process script (launched as subprocess)
     (str(project_root / 'app' / 'window.py'), 'app'),
 ]
